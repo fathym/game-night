@@ -1,0 +1,14 @@
+# dependencies and build output
+voice/node_modules/
+plugin/bin/
+plugin/obj/
+
+# secrets and server-built files, never committed
+.env
+server/plugins/*
+!server/plugins/.gitkeep
+
+# recorded sessions
+server/data/*
+!server/data/.gitkeep
+receiver/data/

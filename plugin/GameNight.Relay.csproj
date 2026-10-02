@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Impostor Server 1.10.x hosts plugins on the .NET 8 runtime; targeting anything newer fails to load. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>GameNight.Relay</AssemblyName>
+    <RootNamespace>GameNight.Relay</RootNamespace>
+    <!-- Only GameNight.Relay.dll goes into Impostor's plugins/ folder. Impostor.Api and its
+         dependencies are already loaded by the server, so don't copy them into the build output. -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Impostor.Api" Version="1.10.8" />
+  </ItemGroup>
+
+</Project>

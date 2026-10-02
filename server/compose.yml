@@ -1,0 +1,52 @@
+# ~/docker/game-night/server/compose.yml
+#
+# Impostor (Among Us server), the game-night receiver and the Discord voice relay, in one compose so
+# the plugin and the relay reach the receiver by service name. Players reach Impostor over Tailscale
+# (README.md, Step 0); HTTPS matchmaking is terminated by a reverse proxy (Nginx Proxy Manager in the
+# runbook), which forwards to the server's LAN address on 22023. Settings and secrets come from .env
+# (see .env.example).
+name: game-night
+
+services:
+  impostor:
+    image: aeonlucid/impostor:v1.10.9
+    container_name: impostor
+    build: https://github.com/Impostor/Impostor.git#feature/v19
+    ports:
+      # HTTP matchmaking, on the LAN interface only; the reverse proxy serves it as HTTPS.
+      - ${SERVER_LAN_IP:?set SERVER_LAN_IP in server/.env to the server's LAN address}:22023:22023/tcp
+      - 22023:22023/udp                 # game traffic, straight to Impostor (players arrive over Tailscale)
+    environment:
+      # What the matchmaker tells every client, you included, to use for game traffic.
+      - IMPOSTOR_Server__PublicIp=${IMPOSTOR_PUBLIC_IP:?set IMPOSTOR_PUBLIC_IP in server/.env to the server's Tailscale address}
+      - IMPOSTOR_Server__PublicPort=22023
+      - GAMENIGHT_URL=http://receiver:8420/events
+    volumes:
+      - ./plugins:/app/plugins          # GameNight.Relay.dll from ./build-plugin.sh
+    depends_on:
+      - receiver
+    restart: unless-stopped
+
+  receiver:
+    build: ../receiver
+    container_name: gamenight-receiver
+    user: "1000:1000"                  # session files in ./data stay owned by the host's first user, not root
+    ports:
+      - 127.0.0.1:8420:8420/tcp        # game events; the plugin reaches it by service name over the compose network
+      - 8421:8421/udp                   # OSC from EmotiBit Oscilloscope on the gaming PC, over the LAN
+    environment:
+      - GAMENIGHT_DATA=/data
+    volumes:
+      - ./data:/data                    # one .jsonl per receiver start
+    restart: unless-stopped
+
+  voice:
+    build: ../voice
+    container_name: gamenight-voice
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN:-}          # both from server/.env (chmod 600, never committed)
+      - GAMENIGHT_PLAYERS=${GAMENIGHT_PLAYERS:-}  # Discord ids of the players who agreed to be recorded
+      - GAMENIGHT_VOICE_URL=http://receiver:8420/voice
+    depends_on:
+      - receiver
+    restart: unless-stopped             # no ports: it only connects out, to Discord and the receiver
