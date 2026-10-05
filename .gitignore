@@ -12,3 +12,6 @@ server/plugins/*
 server/data/*
 !server/data/.gitkeep
 receiver/data/
+
+# fai run writes its logs into the working directory
+.logs/

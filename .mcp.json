@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "game-night": {
+      "type": "stdio",
+      "command": "fai",
+      "args": ["run", "workbench/game-night.ts", "--mode", "MCP"],
+      "env": { "GAMENIGHT_DATA": "${GAMENIGHT_DATA:-}" }
+    }
+  }
+}

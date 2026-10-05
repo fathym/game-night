@@ -1,0 +1,17 @@
+{
+  "tasks": {
+    "mcp": "fai run game-night.ts --mode MCP",
+    "test": "deno test -A",
+    "fixture": "deno run -A test/write-fixture.ts"
+  },
+  // `fai run` (locally and in OpenX) imports the bare "@fathym/fai/workbenches" through this file, so fAI
+  // must be mapped here. steward and zod match the versions fAI 0.0.785 itself uses, to load one copy.
+  "imports": {
+    "@fathym/fai": "jsr:@fathym/fai@0.0.785",
+    "@fathym/steward": "jsr:@fathym/steward@0.1.4",
+    "@modelcontextprotocol/sdk": "npm:@modelcontextprotocol/sdk@1.27.1",
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/path": "jsr:@std/path@1",
+    "zod": "npm:zod@4.1.13"
+  }
+}

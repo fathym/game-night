@@ -261,7 +261,10 @@ this keeps the Step 5–7 test traffic out of the milestone file; do it before a
 made while it is down are dropped (the plugin logs a warning and does not retry). Then, once everyone
 is in the voice channel, `/gamenight start`; when the night is over, `/gamenight stop`.
 
-Receiver running, EmotiBit streaming, voice recording, four players in the lobby, play one game. The
+Receiver running, EmotiBit streaming, voice recording, four players in the lobby. Before starting, the
+EmotiBit wearer does three sync taps, a few seconds apart: tap the EmotiBit sharply while pressing Enter
+on a chat message and saying "now". They let the workbench measure how far each stream lags the game
+clock. Then play one game. The
 file under `server/data/` is the v0 milestone — everything after (transcription, scoring, MCP tools) is
 built in the fAI workbench against it as a replayable fixture. Nothing after v0 lives on this server;
 night 2 is a `GAMENIGHT_URL` / `GAMENIGHT_VOICE_URL` change, not new services here.
@@ -271,6 +274,8 @@ night 2 is a `GAMENIGHT_URL` / `GAMENIGHT_VOICE_URL` change, not new services he
 scp YOUR_USERNAME@192.168.x.y:docker/game-night/server/data/*.jsonl server/data/
 scp -r YOUR_USERNAME@192.168.x.y:docker/game-night/server/data/voice server/data/
 ```
+
+Then check what was recorded with the workbench's `gamenight-check` ([workbench/README.md](../workbench/README.md)).
 
 ---
 
@@ -288,7 +293,8 @@ ls -la data/                             # recorded sessions
 Tailscale has to be running on every player's PC, yours included, whenever you play.
 
 The receiver writes whatever arrives, so close the EmotiBit Oscilloscope when a session is over — left
-streaming, it adds roughly 150 MB/day to `data/`.
+streaming, it adds roughly 60–70 MB an hour (about 1.5 GB a day) to `data/`. Restart the receiver before
+each night, too: it starts a new file only when it starts, and the workbench reads a whole file at once.
 
 Voice is recorded only between `/gamenight start` and `/gamenight stop` (or until no players are left),
 and only for the listed players. Utterance audio lives in `data/voice/` here and wherever Step 8 copied

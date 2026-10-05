@@ -27,6 +27,7 @@ only on the game ports, and nothing on the home network is exposed to the intern
 | `voice/` | Node Discord bot. Joins a voice channel on `/gamenight start` and POSTs each speaker's utterances to the receiver as Ogg Opus. Capture only: no transcription. |
 | `receiver/` | Deno process. HTTP intake for game events and voice, UDP/OSC intake for EmotiBit, one JSONL per session. Seed of the fAI workbench; stamp-and-append only. |
 | `server/` | Compose file, plugin build script, and the deploy runbook for the home server. |
+| `workbench/` | The fAI workbench. Reads the receiver's session files and serves the analysis as MCP tools: what a session captured, and what happened when, with the wearer's biometrics. `.mcp.json` registers it with Claude Code. |
 | `PLAYERS.md` | Setup guide for players joining game night. The host sends it along with the Tailscale invite and `regionInfo.json`. |
 
 ## Event stream
@@ -59,12 +60,16 @@ breaking change.
 
 ## Status
 
-v0 — capture only. See [server/README.md](server/README.md) to deploy and record a first session.
+v0: capture, plus a first workbench that checks a recording and lines up what happened. See
+[server/README.md](server/README.md) to deploy and record a first session, and
+[workbench/README.md](workbench/README.md) to analyze it.
 
 ## Developing
 
 - Plugin: `cd plugin && dotnet build -c Release` (.NET 8 SDK) → `plugin/bin/Release/net8.0/GameNight.Relay.dll`.
 - Receiver: `cd receiver && deno task start` (writes `./data/`, gitignored).
+- Workbench: `cd workbench && deno task test` (Deno 2.6+; the MCP test runs `fai run`). Claude Code
+  starts it from `.mcp.json`.
 - Voice relay: `cd voice && npm install && npm test` (Node 22.12+). `npm start` needs `DISCORD_TOKEN`
   and `GAMENIGHT_PLAYERS`, and `GAMENIGHT_VOICE_URL=http://localhost:8420/voice` to post to a local
   receiver. Use a separate test bot, or stop the server's voice container first: two processes on one
