@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "build": "deno run --allow-write=out --allow-read=. build.ts"
+  },
+  "fmt": { "lineWidth": 110 }
+}
