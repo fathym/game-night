@@ -12,11 +12,13 @@ export interface Pin {
   num: string;
   name: string;
   side: Side;
-  /** Net name; omitted for a pin left unconnected on purpose. */
+  /** Net name. A pin without one must be marked `nc`. */
   net?: string;
+  /** Unconnected on purpose: drawn with a no-connect flag. */
+  nc?: boolean;
 }
 
-export type SymbolKind = "box" | "resistor" | "capacitor";
+export type SymbolKind = "box" | "resistor" | "capacitor" | "inductor";
 
 export interface Part {
   ref: string;
@@ -30,6 +32,8 @@ export interface Part {
   jlcClass?: "Basic Part" | "Extended Part";
   kind: SymbolKind;
   pins: Pin[];
+  /** 7-bit I2C address as strapped, e.g. "0x48"; the build checks that no two parts share one. */
+  i2c?: string;
   /** Extra attributes, e.g. `Resistance (Ohms)`. */
   attrs?: Record<string, string>;
 }
@@ -82,6 +86,13 @@ function pin(p: Pin, px: number, py: number, len: number, showLabels: boolean): 
     `0~${edge + 3}~${py}`,
     `0~M ${edge} ${py - 3} L ${edge - 3} ${py} L ${edge} ${py + 3}`,
   ].join("^^");
+}
+
+/** EasyEDA's no-connect flag: an X at a pin end that is unconnected on purpose. */
+function noConnect(x: number, y: number): string {
+  return `O~${x}~${y}~${id()}~M ${x - 4} ${y - 4} L ${x + 4} ${y + 4} M ${x + 4} ${y - 4} L ${x - 4} ${
+    y + 4
+  }~#33cc33~0`;
 }
 
 function wire(x1: number, y1: number, x2: number, y2: number): string {
@@ -169,6 +180,16 @@ function placePart(p: Part, cx: number, y: number): Placed {
     if (p.kind === "resistor") {
       children.push(pin(l.p, l.x, l.y, 10, false), pin(r.p, r.x, r.y, 10, false));
       children.push(`R~${bodyX + 10}~${py - 4}~~~20~8~#880000~1~0~none~${id()}~0~`);
+    } else if (p.kind === "inductor") {
+      // Four coil humps between the pins, as one polyline (the shape type the examples use).
+      children.push(pin(l.p, l.x, l.y, 10, false), pin(r.p, r.x, r.y, 10, false));
+      const pts: string[] = [];
+      for (let k = 0; k < 4; k++) {
+        const x0 = bodyX + 10 + 5 * k;
+        pts.push(`${x0} ${py}`, `${x0 + 1} ${py - 3}`, `${x0 + 2.5} ${py - 4}`, `${x0 + 4} ${py - 3}`);
+      }
+      pts.push(`${bodyX + 30} ${py}`);
+      children.push(`PL~${pts.join(" ")}~#880000~1~0~none~${id()}~0`);
     } else {
       children.push(pin(l.p, l.x, l.y, 18, false), pin(r.p, r.x, r.y, 18, false));
       children.push(`PL~${bodyX + 18} ${py - 6} ${bodyX + 18} ${py + 6}~#880000~1~0~none~${id()}~0`);
@@ -187,7 +208,10 @@ function placePart(p: Part, cx: number, y: number): Placed {
   shapes.push([head, ...texts, ...children].join("#@$"));
 
   for (const e of ends) {
-    if (!e.p.net) continue;
+    if (!e.p.net) {
+      if (e.p.nc) shapes.push(noConnect(e.x, e.y));
+      continue;
+    }
     const dir = e.p.side === "L" ? -1 : 1;
     const sx = e.x + dir * STUB;
     shapes.push(wire(e.x, e.y, sx, e.y), netPort(e.p.net, sx, e.y, e.p.side));

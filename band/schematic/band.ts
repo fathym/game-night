@@ -1,12 +1,19 @@
 /**
  * The band's circuit: every part, its LCSC number, and the net on each pin. The design behind it is
- * in ../README.md. Pin numbers come from each part's own datasheet (the XIAO's from Seeed's
- * XIAO-ESP32-C6-SMD footprint) and must match the footprint bound in EasyEDA Pro.
+ * in ../README.md and the firmware contract in ../FIRMWARE.md. Pin numbers come from each part's own
+ * datasheet (the XIAO's from Seeed's XIAO-ESP32-C6-SMD footprint) and must match the footprint
+ * bound in EasyEDA Pro.
+ *
+ * A pin marked NC is unconnected on purpose and gets a no-connect flag; the build fails on any pin
+ * that has neither a net nor NC.
  */
 
 import type { Block, Part, Pin, Side } from "./easyeda.ts";
 
 export const title = "game-night band";
+
+/** Marks a pin as unconnected on purpose. */
+const NC = "NC";
 
 interface Stock {
   value: string;
@@ -20,79 +27,27 @@ interface Stock {
 const UNI = "UNI-ROYAL(厚声)";
 const SAMSUNG = "SAMSUNG(三星)";
 
+const resistor = (value: string, lcsc: string, mpn: string, basic = true, footprint = "R0402"): Stock => ({
+  value,
+  footprint,
+  lcsc,
+  manufacturer: UNI,
+  mpn,
+  jlcClass: basic ? "Basic Part" : "Extended Part",
+});
+
 const stock = {
-  r0: {
-    value: "0Ω",
-    footprint: "R0402",
-    lcsc: "C17168",
-    manufacturer: UNI,
-    mpn: "0402WGF0000TCE",
-    jlcClass: "Basic Part",
-  },
-  r1k: {
-    value: "1kΩ",
-    footprint: "R0402",
-    lcsc: "C11702",
-    manufacturer: UNI,
-    mpn: "0402WGF1001TCE",
-    jlcClass: "Basic Part",
-  },
-  r4k7: {
-    value: "4.7kΩ",
-    footprint: "R0402",
-    lcsc: "C25900",
-    manufacturer: UNI,
-    mpn: "0402WGF4701TCE",
-    jlcClass: "Basic Part",
-  },
-  r10k: {
-    value: "10kΩ",
-    footprint: "R0402",
-    lcsc: "C25744",
-    manufacturer: UNI,
-    mpn: "0402WGF1002TCE",
-    jlcClass: "Basic Part",
-  },
-  r100k: {
-    value: "100kΩ",
-    footprint: "R0402",
-    lcsc: "C25741",
-    manufacturer: UNI,
-    mpn: "0402WGF1003TCE",
-    jlcClass: "Basic Part",
-  },
-  r1m: {
-    value: "1MΩ",
-    footprint: "R0402",
-    lcsc: "C26083",
-    manufacturer: UNI,
-    mpn: "0402WGF1004TCE",
-    jlcClass: "Basic Part",
-  },
-  r270k: {
-    value: "270kΩ",
-    footprint: "R0402",
-    lcsc: "C25770",
-    manufacturer: UNI,
-    mpn: "0402WGF2703TCE",
-    jlcClass: "Extended Part",
-  },
-  r180k: {
-    value: "180kΩ",
-    footprint: "R0603",
-    lcsc: "C22827",
-    manufacturer: UNI,
-    mpn: "0603WAF1803T5E",
-    jlcClass: "Extended Part",
-  },
-  r49k9: {
-    value: "49.9kΩ",
-    footprint: "R0603",
-    lcsc: "C23184",
-    manufacturer: UNI,
-    mpn: "0603WAF4992T5E",
-    jlcClass: "Basic Part",
-  },
+  r0: resistor("0Ω", "C17168", "0402WGF0000TCE"),
+  r1k: resistor("1kΩ", "C11702", "0402WGF1001TCE"),
+  r2k2: resistor("2.2kΩ", "C25879", "0402WGF2201TCE"),
+  r4k7: resistor("4.7kΩ", "C25900", "0402WGF4701TCE"),
+  r6k8: resistor("6.8kΩ", "C25917", "0402WGF6801TCE", false),
+  r10k: resistor("10kΩ", "C25744", "0402WGF1002TCE"),
+  r100k: resistor("100kΩ", "C25741", "0402WGF1003TCE"),
+  r270k: resistor("270kΩ", "C25770", "0402WGF2703TCE", false),
+  r1m: resistor("1MΩ", "C26083", "0402WGF1004TCE"),
+  r180k: resistor("180kΩ", "C22827", "0603WAF1803T5E", false, "R0603"),
+  r49k9: resistor("49.9kΩ", "C23184", "0603WAF4992T5E", true, "R0603"),
   r68k: {
     value: "68kΩ 0.1%",
     footprint: "R0603",
@@ -136,14 +91,14 @@ const stock = {
   c22u: {
     value: "22uF",
     footprint: "C0805",
-    lcsc: "C45783",
+    lcsc: "C602037",
     manufacturer: SAMSUNG,
-    mpn: "CL21A226MAQNNNE",
-    jlcClass: "Basic Part",
+    mpn: "CL21A226MAYNNNE",
+    jlcClass: "Extended Part",
   },
   l2u2: {
     value: "2.2uH",
-    footprint: "IND-SMD_L2.0-W1.6",
+    footprint: "L0806",
     lcsc: "C79317",
     manufacturer: "Murata",
     mpn: "DFE201612P-2R2M=P2",
@@ -151,11 +106,13 @@ const stock = {
   },
 } satisfies Record<string, Stock>;
 
+type TwoPin = "resistor" | "capacitor" | "inductor";
+
 /** A two-pin passive: pin 1 on the left, pin 2 on the right. */
-function two(ref: string, s: Stock, a: string, b: string, kind: "resistor" | "capacitor", dnp = false): Part {
+function two(ref: string, s: Stock, a: string, b: string, kind: TwoPin, dnp?: string): Part {
   return {
     ref,
-    value: dnp ? `${s.value} DNP` : s.value,
+    value: dnp ? `${s.value} DNP, ${dnp}` : s.value,
     footprint: s.footprint,
     ...(dnp ? {} : { lcsc: s.lcsc, manufacturer: s.manufacturer, mpn: s.mpn, jlcClass: s.jlcClass }),
     kind,
@@ -167,12 +124,13 @@ function two(ref: string, s: Stock, a: string, b: string, kind: "resistor" | "ca
 }
 const R = (ref: string, s: Stock, a: string, b: string) => two(ref, s, a, b, "resistor");
 const C = (ref: string, s: Stock, a: string, b = "GND") => two(ref, s, a, b, "capacitor");
+const L = (ref: string, s: Stock, a: string, b: string) => two(ref, s, a, b, "inductor");
 
-/** Pins as [number, name, side, net?]; a missing net means unconnected on purpose. */
-const pins = (...rows: [string, string, Side, string?][]): Pin[] =>
-  rows.map(([num, name, side, net]) => ({ num, name, side, ...(net ? { net } : {}) }));
+/** Pins as [number, name, side, net]; NC marks a pin left unconnected on purpose. */
+const pins = (...rows: [string, string, Side, string][]): Pin[] =>
+  rows.map(([num, name, side, net]) => net === NC ? { num, name, side, nc: true } : { num, name, side, net });
 
-/** A single-pad feature with no part to buy: an electrode contact or a test point. */
+/** A single-pad feature with no part to buy: an electrode contact, a test point, a skin pad. */
 const pad = (ref: string, value: string, footprint: string, net: string): Part => ({
   ref,
   value,
@@ -182,15 +140,15 @@ const pad = (ref: string, value: string, footprint: string, net: string): Part =
 });
 
 const power: Block = {
-  title: "Battery (check JST polarity), reverse protection, fuel gauge, USB sense",
+  title: "Battery, reverse protection, fuel gauge, USB sense",
   parts: [
     {
       ref: "J1",
-      value: "S2B-PH-SM4-TB",
-      footprint: "CONN-SMD_JST_S2B-PH-SM4-TB",
-      lcsc: "C295747",
+      value: "SM02B-SRSS-TB (check cell polarity)",
+      footprint: "CONN-SMD_P1.00_SM02B-SRSS-TB",
+      lcsc: "C160402",
       manufacturer: "JST",
-      mpn: "S2B-PH-SM4-TB(LF)(SN)",
+      mpn: "SM02B-SRSS-TB(LF)(SN)",
       jlcClass: "Extended Part",
       kind: "box",
       pins: pins(["1", "BAT+", "R", "BAT_IN"], ["2", "BAT-", "R", "GND"]),
@@ -204,12 +162,12 @@ const power: Block = {
       mpn: "MK-12C02-G020",
       jlcClass: "Extended Part",
       kind: "box",
-      pins: pins(["1", "A", "L", "BAT_IN"], ["2", "COM", "R", "BAT_SW"], ["3", "B", "L"]),
+      pins: pins(["1", "A", "L", "BAT_IN"], ["2", "COM", "R", "BAT_SW"], ["3", "B", "L", NC]),
     },
     {
       ref: "Q1",
       value: "AO3401A",
-      footprint: "SOT-23-3_L2.9-W1.3-P1.90-LS2.4-BR",
+      footprint: "SOT-23_L2.9-W1.3-P1.90-LS2.4-BR",
       lcsc: "C15127",
       manufacturer: "AOS",
       mpn: "AO3401A",
@@ -221,11 +179,12 @@ const power: Block = {
     {
       ref: "U2",
       value: "MAX17048G+T10",
-      footprint: "TDFN-8_L2.0-W2.0-P0.50-EP",
+      footprint: "TDFN-8_L2.0-W2.0-P0.50-BL-EP1.2",
       lcsc: "C2682616",
       manufacturer: "ADI/MAXIM",
       mpn: "MAX17048G+T10",
       jlcClass: "Extended Part",
+      i2c: "0x36",
       kind: "box",
       pins: pins(
         ["3", "VDD", "L", "VBAT"],
@@ -240,60 +199,77 @@ const power: Block = {
       ),
     },
     C("C2", stock.c100n, "VBAT"),
-    R("R1", stock.r100k, "VBUS", "VBUS_DIV"),
-    R("R2", stock.r100k, "VBUS_DIV", "GND"),
+    // 0.6 x VBUS, and stiff enough that the XIAO's warm VBUS diode leakage can't lift it on battery.
+    R("R1", stock.r6k8, "VBUS", "VBUS_DIV"),
+    R("R2", stock.r10k, "VBUS_DIV", "GND"),
   ],
 };
 
 const mcu: Block = {
-  title: "XIAO ESP32C6 (pads 15-22 under the board stay unconnected)",
+  title: "XIAO ESP32C6 on Seeed's SMD footprint (underside pads 15, 16, 18, 19, 20, 22 unused)",
   parts: [
     {
       ref: "U1",
       value: "XIAO ESP32C6",
       footprint: "XIAO-ESP32-C6-SMD",
-      lcsc: "C9900124963",
+      lcsc: "C27675191",
       manufacturer: "Seeed Studio",
-      mpn: "XIAO-ESP32-C6",
+      mpn: "113991254",
       jlcClass: "Extended Part",
       kind: "box",
       pins: pins(
         ["1", "D0", "L", "PPG_INT"],
         ["2", "D1", "L", "IMU_INT"],
-        ["3", "D2", "L", "ADC_RDY"],
+        ["3", "D2", "L", "VLED_EN"],
         ["4", "D3", "L", "VBUS_DIV"],
         ["5", "D4/SDA", "L", "SDA"],
         ["6", "D5/SCL", "L", "SCL"],
-        ["7", "D6/TX", "L"],
+        ["7", "D6/TX", "L", "STATUS_LED"],
+        ["17", "EN", "L", "XIAO_EN"],
+        ["21", "BOOT", "L", "XIAO_BOOT"],
         ["14", "5V", "R", "VBUS"],
         ["13", "GND", "R", "GND"],
         ["12", "3V3", "R", "3V3"],
         ["11", "D10", "R", "GAUGE_ALRT"],
-        ["10", "D9", "R", "VLED_EN"],
+        ["10", "D9", "R", "ADC_RDY"],
         ["9", "D8", "R", "PLUG_DET"],
-        ["8", "D7/RX", "R"],
+        ["8", "D7/RX", "R", NC],
         ["23", "BAT+", "R", "VBAT"],
         ["24", "BAT-", "R", "GND"],
       ),
     },
-    C("C3", stock.c10u, "3V3"),
-    R("R3", stock.r4k7, "SDA", "3V3"),
-    R("R4", stock.r4k7, "SCL", "3V3"),
+    R("R3", stock.r2k2, "SDA", "3V3"),
+    R("R4", stock.r2k2, "SCL", "3V3"),
     R("R5", stock.r4k7, "PPG_INT", "3V3"),
     R("R6", stock.r10k, "ADC_RDY", "3V3"),
     R("R7", stock.r10k, "GAUGE_ALRT", "3V3"),
     R("R8", stock.r100k, "PLUG_DET", "3V3"),
+    // D2 has no pull at or after reset, so this keeps the LED boost off through boot.
     R("R9", stock.r100k, "VLED_EN", "GND"),
+    {
+      ref: "D5",
+      value: "KT-0603R status",
+      footprint: "LED-SMD_L1.6-W0.8-R-RD",
+      lcsc: "C2286",
+      manufacturer: "Hubei KENTO Elec",
+      mpn: "KT-0603R",
+      jlcClass: "Basic Part",
+      kind: "box",
+      pins: pins(["1", "A", "L", "LED_A"], ["2", "K", "R", "STATUS_LED"]),
+    },
+    R("R23", stock.r1k, "3V3", "LED_A"),
+    pad("TP4", "BOOT", "TP_1.0mm", "XIAO_BOOT"),
+    pad("TP5", "EN", "TP_1.0mm", "XIAO_EN"),
   ],
 };
 
 const ppgPower: Block = {
-  title: "PPG supplies: 5 V boost for the LEDs, 1.8 V for the core",
+  title: "PPG supplies: 4.7 V boost for the LEDs, 1.8 V for the core",
   parts: [
     {
       ref: "U3",
       value: "TPS61099DRVR",
-      footprint: "WSON-6_L2.0-W2.0-P0.65-EP",
+      footprint: "WSON-6_L2.0-W2.0-P0.65-TL-EP",
       lcsc: "C2842395",
       manufacturer: "TI",
       mpn: "TPS61099DRVR",
@@ -305,22 +281,23 @@ const ppgPower: Block = {
         ["4", "EN", "L", "VLED_EN"],
         ["1", "GND", "L", "GND"],
         ["7", "EP", "L", "GND"],
-        ["2", "VOUT", "R", "V5_LED"],
+        ["2", "VOUT", "R", "VBOOST"],
         ["3", "FB", "R", "FB_BOOST"],
       ),
     },
-    R("L1", stock.l2u2, "VBAT", "SW_BOOST"),
+    L("L1", stock.l2u2, "VBAT", "SW_BOOST"),
     C("C4", stock.c10u, "VBAT"),
-    C("C5", stock.c22u, "V5_LED"),
-    C("C6", stock.c22u, "V5_LED"),
-    R("R10", stock.r1m, "V5_LED", "FB_BOOST"),
+    C("C5", stock.c22u, "VBOOST"),
+    C("C6", stock.c22u, "VBOOST"),
+    // 1.00 V x (1 + 1M/270k) = 4.70 V in PWM, about 4.85 V at light load: inside both LED windows.
+    R("R10", stock.r1m, "VBOOST", "FB_BOOST"),
     R("R11", stock.r270k, "FB_BOOST", "GND"),
-    R("R12", stock.r0, "V5_LED", "VLED"),
-    two("R13", stock.r0, "3V3", "VLED", "resistor", true),
+    R("R12", stock.r0, "VBOOST", "VLED"),
+    two("R13", stock.r0, "3V3", "VLED", "resistor", "fit only with R12 removed"),
     {
       ref: "U4",
       value: "XC6206P182MR",
-      footprint: "SOT-23-3_L2.9-W1.3-P1.90-LS2.4-BR",
+      footprint: "SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR",
       lcsc: "C21659",
       manufacturer: "TOREX",
       mpn: "XC6206P182MR",
@@ -333,7 +310,7 @@ const ppgPower: Block = {
 };
 
 const ppg: Block = {
-  title: "PPG (on the skin side)",
+  title: "PPG (skin side, under its window)",
   parts: [
     {
       ref: "U5",
@@ -343,6 +320,7 @@ const ppg: Block = {
       manufacturer: "ADI/MAXIM",
       mpn: "MAX30101EFD+T",
       jlcClass: "Extended Part",
+      i2c: "0x57",
       kind: "box",
       pins: pins(
         ["11", "VDD", "L", "1V8"],
@@ -350,15 +328,15 @@ const ppg: Block = {
         ["10", "VLED+", "L", "VLED"],
         ["12", "GND", "L", "GND"],
         ["4", "PGND", "L", "GND"],
-        ["1", "NC", "L"],
-        ["5", "NC", "L"],
+        ["1", "NC", "L", NC],
+        ["5", "NC", "L", NC],
         ["3", "SDA", "R", "SDA"],
         ["2", "SCL", "R", "SCL"],
         ["13", "INT", "R", "PPG_INT"],
-        ["6", "NC", "R"],
-        ["7", "NC", "R"],
-        ["8", "NC", "R"],
-        ["14", "NC", "R"],
+        ["6", "NC", "R", NC],
+        ["7", "NC", "R", NC],
+        ["8", "NC", "R", NC],
+        ["14", "NC", "R", NC],
       ),
     },
     C("C8", stock.c10u, "1V8"),
@@ -369,16 +347,17 @@ const ppg: Block = {
 };
 
 const sensors: Block = {
-  title: "Motion and skin temperature",
+  title: "Motion and skin temperature (TMP117 on top of a slotted tab)",
   parts: [
     {
       ref: "U6",
       value: "LSM6DSOXTR",
-      footprint: "LGA-14_L3.0-W2.5-P0.50",
+      footprint: "LGA-14L_L3.0-W2.5-P0.50-TL",
       lcsc: "C481766",
       manufacturer: "ST",
       mpn: "LSM6DSOXTR",
       jlcClass: "Extended Part",
+      i2c: "0x6A",
       kind: "box",
       pins: pins(
         ["8", "VDD", "L", "3V3"],
@@ -391,10 +370,11 @@ const sensors: Block = {
         ["7", "GND", "L", "GND"],
         ["14", "SDA", "R", "SDA"],
         ["13", "SCL", "R", "SCL"],
+        // INT2, not INT1: INT1 must sit low at power-on or the part starts in I3C-only mode.
         ["9", "INT2", "R", "IMU_INT"],
-        ["4", "INT1", "R"],
-        ["10", "OCS_AUX", "R"],
-        ["11", "SDO_AUX", "R"],
+        ["4", "INT1", "R", NC],
+        ["10", "OCS_AUX", "R", NC],
+        ["11", "SDO_AUX", "R", NC],
       ),
     },
     C("C12", stock.c100n, "3V3"),
@@ -402,22 +382,27 @@ const sensors: Block = {
     {
       ref: "U7",
       value: "TMP117AIDRVR",
-      footprint: "WSON-6_L2.0-W2.0-P0.65",
+      footprint: "WSON-6_L2.0-W2.0-P0.65-TL-EP",
       lcsc: "C699536",
       manufacturer: "TI",
       mpn: "TMP117AIDRVR",
       jlcClass: "Extended Part",
+      i2c: "0x49",
       kind: "box",
       pins: pins(
         ["5", "V+", "L", "3V3"],
         ["4", "ADD0", "L", "3V3"],
         ["2", "GND", "L", "GND"],
+        // The thermal pad isn't tied to device ground. It solders to a floating land that vias join
+        // to TC1, the skin-side pad, so skin heat reaches the die; TEMP_PAD carries no circuit.
+        ["7", "EP", "L", "TEMP_PAD"],
         ["6", "SDA", "R", "SDA"],
         ["1", "SCL", "R", "SCL"],
-        ["3", "ALERT", "R"],
+        ["3", "ALERT", "R", NC],
       ),
     },
     C("C14", stock.c100n, "3V3"),
+    pad("TC1", "Skin temperature pad, no circuit net", "TEMP_SKIN_PAD", "TEMP_PAD"),
   ],
 };
 
@@ -432,7 +417,7 @@ const eda: Block = {
     {
       ref: "U8",
       value: "OPA2333AIDGKR",
-      footprint: "VSSOP-8_L3.0-W3.0-P0.65",
+      footprint: "MSOP-8_L3.0-W3.0-P0.65-LS5.0-BL",
       lcsc: "C19608",
       manufacturer: "TI",
       mpn: "OPA2333AIDGKR",
@@ -452,17 +437,21 @@ const eda: Block = {
     C("C17", stock.c100n, "3V3"),
     R("R17", stock.r68k, "SENSE_IN", "EDA_OUT"),
     C("C18", stock.c470n, "SENSE_IN", "EDA_OUT"),
+    // Anti-alias RC at the ADC: 1.6 kHz corner, -44 dB at the 250 kHz modulator, nothing at 60 Hz.
+    R("R22", stock.r1k, "EDA_OUT", "EDA_ADC"),
+    C("C21", stock.c100n, "EDA_ADC", "V15"),
     {
       ref: "U9",
       value: "ADS1115IDGSR",
-      footprint: "VSSOP-10_L3.0-W3.0-P0.50",
+      footprint: "MSOP-10_L3.0-W3.0-P0.50-LS5.0-BL",
       lcsc: "C37593",
       manufacturer: "TI",
       mpn: "ADS1115IDGSR",
       jlcClass: "Extended Part",
+      i2c: "0x48",
       kind: "box",
       pins: pins(
-        ["4", "AIN0", "L", "EDA_OUT"],
+        ["4", "AIN0", "L", "EDA_ADC"],
         ["5", "AIN1", "L", "V15"],
         ["6", "AIN2", "L", "V15"],
         ["7", "AIN3", "L", "V10"],
@@ -484,7 +473,7 @@ const eda: Block = {
 const esd = (ref: string, net: string): Part => ({
   ref,
   value: "ESD321DPYR",
-  footprint: "X1SON-2_L1.0-W0.6",
+  footprint: "X1SON-2_L1.0-W0.6-P0.65-RD-1",
   lcsc: "C2868952",
   manufacturer: "TI",
   mpn: "ESD321DPYR",
@@ -494,12 +483,12 @@ const esd = (ref: string, net: string): Part => ({
 });
 
 const electrodes: Block = {
-  title: "Electrodes: wrist snaps or the jack, opened while USB power is present",
+  title: "Electrodes: wrist contacts or the finger lead, opened while USB power is present",
   parts: [
     {
       ref: "U10",
       value: "TMUX1133PWR",
-      footprint: "TSSOP-16_L5.0-W4.4-P0.65",
+      footprint: "TSSOP-16_L5.0-W4.4-P0.65-LS6.4-BL",
       lcsc: "C1849385",
       manufacturer: "TI",
       mpn: "TMUX1133PWR",
@@ -533,11 +522,11 @@ const electrodes: Block = {
     esd("D2", "WRIST_B"),
     esd("D3", "JACK_TIP"),
     esd("D4", "JACK_RING"),
-    pad("E1", "Wrist electrode A", "ELECTRODE_SNAP", "WRIST_A"),
-    pad("E2", "Wrist electrode B", "ELECTRODE_SNAP", "WRIST_B"),
+    pad("E1", "Wrist contact A (Ag/AgCl disc)", "ELECTRODE_CONTACT", "WRIST_A"),
+    pad("E2", "Wrist contact B (Ag/AgCl disc)", "ELECTRODE_CONTACT", "WRIST_B"),
     {
       ref: "J2",
-      value: "PJ-3701-SMT",
+      value: "PJ-3701-SMT finger lead",
       footprint: "AUDIO-SMD_PJ-3701-SMT",
       lcsc: "C2684645",
       manufacturer: "XKB Connection",
