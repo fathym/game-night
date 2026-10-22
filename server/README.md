@@ -104,6 +104,16 @@ An empty `gamenight` grep usually means Impostor is still starting — wait a fe
 or watch `docker compose logs -f impostor`. If every compose command fails with "required variable
 SERVER_LAN_IP (or IMPOSTOR_PUBLIC_IP) is missing a value", `.env` is missing or that line is still empty.
 
+**Clock gate.** Game events and voice are stamped on this server's clock, and wearables keep UTC on
+their own, so the server must keep NTP time:
+
+```bash
+timedatectl                    # → System clock synchronized: yes, NTP service: active
+timedatectl timesync-status    # → Offset: a few ms (systemd-timesyncd, Ubuntu's default)
+```
+
+If it says `no`, run `sudo timedatectl set-ntp true`. If you use chrony instead, check `chronyc tracking`.
+
 If you use UFW, these rules record the intent (Docker-published ports bypass UFW, so they don't gate
 anything):
 

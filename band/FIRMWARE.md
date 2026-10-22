@@ -41,8 +41,9 @@ Two kinds of secret, loaded by two people:
   never see the key.
 - **The player, over the setup hotspot.** If the band has no saved network, or can't join any for 2
   minutes, it opens a Wi-Fi network named `GameNight-B03` (password printed on the band) for 10
-  minutes. Joining it from any phone or PC opens a page to enter the home network. The same setup
-  is reachable over USB through the Web Serial tool, using the Improv serial protocol, as a backup.
+  minutes. Joining it from any phone or PC opens a captive-portal page at `http://192.168.4.1` to
+  enter the home network. The same setup is reachable over USB through the Web Serial tool, using the
+  Improv serial protocol, as a backup.
 - **2.4 GHz only.** If the router has separate 2.4 and 5 GHz network names, the player picks the 2.4
   GHz one. WPA2/WPA3 personal and enterprise both work.
 

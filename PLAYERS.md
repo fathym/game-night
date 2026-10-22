@@ -2,6 +2,9 @@
 
 One-time setup for players, on a Windows PC. It takes about ten minutes.
 
+This guide is for game nights your host runs from home. If your host runs the server in Azure, use
+[PLAYERS-AZURE.md](PLAYERS-AZURE.md) instead: it needs no Tailscale.
+
 You'll need:
 
 - Among Us on PC from **Steam** or **Epic Games**, updated to the latest version. Have the Microsoft
@@ -50,12 +53,58 @@ Still nothing? See [If the web address won't load](#if-the-web-address-wont-load
 3. Start Among Us → **Online** → the game-night region → type the lobby code your host shares → join.
 4. Keep your in-game name to 10 characters or fewer.
 
-**About recording:** everyone agreed to have game night recorded. A bot called **GameNight Recorder**
-joins the voice channel and posts "🔴 Recording game-night players…" when it starts. It records only
-the players who agreed, and anyone can type `/gamenight stop` in Discord to stop it. The host's server
-also logs each round: meetings, votes, kills and in-game chat.
+**About recording:** everyone agreed to have game night recorded.
+- **Voice.** A bot called **GameNight Recorder** joins the voice channel and posts "🔴 Recording
+  game-night players…" when it starts. It records only the players who agreed, and anyone can type
+  `/gamenight stop` in Discord to stop it. Your host deletes the audio once it has been transcribed.
+- **Game.** The host's server also logs each round: meetings, votes, kills and in-game chat.
+- **Bands.** If you wear one, it records skin conductance, pulse, skin temperature and how much your
+  wrist moves. It does this only while game night is recording, and never while it's charging.
+- **Where it goes.** Everything is kept in your host's own private storage.
 
 After game night you can leave Tailscale running or quit it (right-click its icon → **Exit**).
+
+## 5. If your host gave you a band
+
+The band is a wrist sensor for the lie-detector part of game night. It sends its readings over your
+home Wi-Fi.
+
+**Set it up on your Wi-Fi (once):**
+1. Switch the band on with the small switch on its side. The light on the band blinks fast: it can't
+   find a network yet.
+2. On your phone or PC, join the Wi-Fi network **GameNight-B…** (the band's ID; the password is
+   printed on the band). A setup page opens. If it doesn't, open a browser and go to
+   `http://192.168.4.1`.
+3. Pick your home Wi-Fi and enter its password. It must be a **2.4 GHz** network: if your router shows
+   two names, pick the one without "5G".
+4. The light changes to a single blink every few seconds: the band is connected and waiting for game
+   night.
+
+**The day before:** charge it. Take it off, switch it **on**, and plug it into a USB charger. It only
+charges while switched on. The red light inside shows it's charging.
+
+**Putting it on**, at least 15 minutes before the first round:
+1. Rinse your wrist and fingers with plain water: no hand sanitizer or lotion.
+2. Strap the band on the back of the wrist you **don't** use for the mouse, just above the wrist bone,
+   with the USB end toward your elbow. Snug, so it can't slide.
+3. Stick two fresh finger electrodes on the palm side of the middle segments of your index and middle
+   fingers, on the same hand. Clip on the lead's snaps marked **tip** and **ring** (leave any third
+   snap unused). Plug the lead into the band, and clip the cable to the strap.
+4. Play with Among Us's default mouse-only controls, so the band hand stays still.
+
+**During meetings**, rest that forearm on an armrest or your lap rather than pressing the band on the
+desk edge.
+
+| The band's light | Meaning |
+|---|---|
+| Fast blink | Not connected to Wi-Fi; the setup network is open |
+| One blink every few seconds | Connected, not recording |
+| Two blinks every few seconds | Recording |
+| Three blinks every few seconds | Battery low: charge it after the game |
+| Off | Switched off, or asleep between game nights |
+
+Keep the band and strap for yourself. If a band passes to someone else, wipe its back with 70% rubbing
+alcohol first.
 
 ## If something goes wrong
 
