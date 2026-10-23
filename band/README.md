@@ -413,15 +413,21 @@ come from each part's datasheet by hand.
    `band.ts` exactly. The first import, on 2026-10-23, matched: 71 parts, 40 nets, 214 pin
    connections.
 4. Bind a footprint to each part (Tools → Footprint Manager). A schematic imported on its own
-   arrives without footprints. Symbol pin numbers are the datasheet's. Check these by hand:
-   - **XIAO:** import
-     [footprints/XIAO-ESP32-C6-SMD.kicad_mod](schematic/footprints/XIAO-ESP32-C6-SMD.kicad_mod) with
-     File → Import → KiCad.
-     - It is Seeed's footprint (MIT), converted to the KiCad 5 format EasyEDA Pro reads, because
-       Seeed's own KiCad 9 file is refused. `deno task footprints` regenerates it. All 24 pads are
-       identical to Seeed's.
-     - Don't use JLC's C9900124963 footprint, which misnumbers the underside pads. C27675191 has no
-       EasyEDA footprint.
+   arrives without footprints. The `Supplier Part` C-numbers survive the import (checked
+   2026-10-23), and symbol pin numbers are the datasheet's. Check these by hand:
+   - **XIAO:** copy the EasyEDA footprint of JLC part C9900124963 into the project library and renumber
+     its eight round underside pads by position, to Seeed's numbering:
+     - **The two columns.** The column nearer the D0–D6 edge pads (1–7) reads 15, 17, 19, 21, from
+       the USB end (where pads 1 and 14 sit). The other column reads 16, 18, 20, 22.
+     - **Why.** JLC's copy numbers them down each column instead, so its 17 and 21 sit on the MTMS
+       and MTCK pads rather than EN and BOOT.
+     - **Unchanged.** Edge pads 1–14 and the battery pads already match. Pad 23 (BAT+) is the one
+       nearer D0–D6.
+     - **Reference geometry.** C27675191 itself has no EasyEDA footprint. EasyEDA Pro's in-editor
+       KiCad import refused both Seeed's KiCad 9 file and a KiCad 5 conversion
+       ([footprints/XIAO-ESP32-C6-SMD.kicad_mod](schematic/footprints/XIAO-ESP32-C6-SMD.kicad_mod),
+       `deno task footprints`). That conversion is kept as the reference geometry: Seeed's 24 pads,
+       unchanged.
    - **Exposed pads:** MAX17048 pad 9 and TPS61099 pad 7 go to GND. TMP117 pad 7 is TEMP_PAD:
      pasted and soldered, joined only to TC1's vias. Some footprints call an exposed pad `EP`
      instead of a number.
