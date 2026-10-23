@@ -1,6 +1,8 @@
 {
   "tasks": {
-    "build": "deno run --allow-write=out --allow-read=. build.ts"
+    "build": "deno run --allow-write=out --allow-read=. build.ts",
+    "diff-netlist": "deno run --allow-read diff-netlist.ts",
+    "footprints": "deno run --allow-read=footprints --allow-write=footprints footprints/kicad5.ts footprints/XIAO-ESP32-C6-SMD.seeed.kicad_mod footprints/XIAO-ESP32-C6-SMD.kicad_mod"
   },
   "fmt": { "lineWidth": 110 }
 }

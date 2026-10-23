@@ -408,11 +408,20 @@ come from each part's datasheet by hand.
 **Importing into EasyEDA Pro:**
 1. Open or create a project.
 2. Use File → Import → EasyEDA (Standard) and pick `band-easyeda.json`.
-3. Bind a footprint to each part. A schematic imported on its own arrives without footprints. Every
-   part keeps its LCSC number as `Supplier Part`, and symbol pin numbers are the datasheet's. Check
-   these by hand:
-   - **XIAO:** import Seeed's `XIAO-ESP32-C6-SMD`. C27675191 has no EasyEDA footprint, and JLC's
-     C9900124963 footprint misnumbers the underside pads.
+3. **Check the import.** Export the netlist (File → Export → Netlist, "FreePCB for PCB") and run
+   `deno task diff-netlist <the .net file>`. It must report that parts, nets and pin connections match
+   `band.ts` exactly. The first import, on 2026-10-23, matched: 71 parts, 40 nets, 214 pin
+   connections.
+4. Bind a footprint to each part (Tools → Footprint Manager). A schematic imported on its own
+   arrives without footprints. Symbol pin numbers are the datasheet's. Check these by hand:
+   - **XIAO:** import
+     [footprints/XIAO-ESP32-C6-SMD.kicad_mod](schematic/footprints/XIAO-ESP32-C6-SMD.kicad_mod) with
+     File → Import → KiCad.
+     - It is Seeed's footprint (MIT), converted to the KiCad 5 format EasyEDA Pro reads, because
+       Seeed's own KiCad 9 file is refused. `deno task footprints` regenerates it. All 24 pads are
+       identical to Seeed's.
+     - Don't use JLC's C9900124963 footprint, which misnumbers the underside pads. C27675191 has no
+       EasyEDA footprint.
    - **Exposed pads:** MAX17048 pad 9 and TPS61099 pad 7 go to GND. TMP117 pad 7 is TEMP_PAD:
      pasted and soldered, joined only to TC1's vias. Some footprints call an exposed pad `EP`
      instead of a number.
@@ -423,13 +432,13 @@ come from each part's datasheet by hand.
    - **Jack:** see [Open questions](#open-questions).
    - **No-buy parts:** E1/E2 (wrist contacts), TC1 (skin pad) and TP1–TP5 (test points) have no LCSC
      number. R13 is marked DNP. None of these is in the BOM.
-4. Run the design check, then update the PCB from the schematic.
+5. Run the design check, then update the PCB from the schematic.
 
 **Which file is the master:**
 - **Until layout starts,** `band.ts` is the source of truth: change it and rebuild, then re-import.
 - **Once a board layout exists,** re-importing means re-binding every footprint. From then on make
-  changes in EasyEDA Pro, mirror them in `band.ts`, and diff Pro's exported netlist and BOM against
-  `out/` before each order.
+  changes in EasyEDA Pro, mirror them in `band.ts`, and run `deno task diff-netlist` on Pro's
+  exported netlist before each order.
 
 ## Ordering
 
