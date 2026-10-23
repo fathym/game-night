@@ -418,15 +418,23 @@ come from each part's datasheet by hand.
    2026-10-23), and symbol pin numbers are the datasheet's. Check these by hand:
    - **XIAO:** bind the EasyEDA footprint of JLC part C9900124963, then renumber its eight round
      underside pads to Seeed's numbering. C27675191 itself has no EasyEDA footprint.
-     - **Bind.** Search C9900124963 in the library (Shift+F) to see its footprint's name. Select U1,
-       click the footprint box in the right-hand panel (it opens the Footprint Manager) and pick that
-       footprint. The project library then holds a copy. System-library footprints can't be edited,
-       but the copy can.
+     - **Bind.** Select U1, click the footprint box in the right-hand panel (it opens the Footprint
+       Manager) and pick `LCC-14P_L17.7-W20.8-XIAO-ESP32-C6`, C9900124963's footprint. The project
+       library then holds a copy. System-library footprints can't be edited, but the copy can.
      - **Renumber.** Open the copy: right-click it in the bottom panel's Project Library, or right-click
-       U1 in the PCB. Pads 1 and 14 mark the USB end. From that end, the column of round pads nearer
-       pads 1–7 must read 15, 17, 19, 21, and the other column 16, 18, 20, 22. JLC numbers them down
-       each column, so six change: 16→17, 17→19, 18→21, 19→16, 20→18 and 21→20. Edge pads 1–14 and
-       the battery pads already match. Pad 23 (BAT+) is the one nearer pads 1–7.
+       U1 in the PCB. Make sure it's the footprint. JLC's symbol for the part has its pins in two
+       columns, 1–12 and 13–24, and isn't used. Pads 1 and 14 mark the USB end. JLC numbers the eight
+       round pads down each column; Seeed numbers them across, row by row from that end, so six
+       change:
+
+       | Round pads | Column nearer pads 1–7 | Other column |
+       |---|---|---|
+       | Row 1, at the USB end | 15 stays | 19 → 16 |
+       | Row 2 | 16 → 17 (EN) | 20 → 18 |
+       | Row 3 | 17 → 19 | 21 → 20 |
+       | Row 4 | 18 → 21 (BOOT) | 22 stays |
+
+       Edge pads 1–14 and the battery pads already match. Pad 23 (BAT+) is the one nearer pads 1–7.
      - **Check,** once the PCB exists: in that column, the round pad second from the USB end shows net
        XIAO_EN and the fourth shows XIAO_BOOT. If Design → Update Project Library offers to update
        this footprint, decline, or it may bring back JLC's numbering.
