@@ -77,13 +77,14 @@ regulator and a certified radio, so the carrier has no RF or charging design to 
 - Nothing metal, and no cell, lead or electrode, within about 10 mm of that end.
 
 **The footprint.**
-- Use Seeed's `XIAO-ESP32-C6-SMD` footprint, from
-  [OSHW-XIAO-Series](https://github.com/Seeed-Studio/OSHW-XIAO-Series). It numbers pads 1–14 on the
-  edges and the underside as 15 MTDI, 16 MTDO, 17 EN, 18 GND, 19 MTMS, 20 MTCK, 21 BOOT, 22 3V3, 23
-  BAT+ and 24 BAT−.
+- Number the pads as Seeed's `XIAO-ESP32-C6-SMD` footprint does, from
+  [OSHW-XIAO-Series](https://github.com/Seeed-Studio/OSHW-XIAO-Series): pads 1–14 on the edges, and
+  the underside as 15 MTDI, 16 MTDO, 17 EN, 18 GND, 19 MTMS, 20 MTCK, 21 BOOT, 22 3V3, 23 BAT+ and
+  24 BAT−.
 - The schematic wires 17 (EN) and 21 (BOOT) to test pads; 15, 16, 18, 19, 20 and 22 stay unused.
-- Don't use JLC's library footprint for the part. It mislabels pads 16–22 (its "GND" pad 16 is really
-  EN), so it would wire the test pads to the wrong pins.
+- In EasyEDA, JLC's library footprint (C9900124963) has to be renumbered first, as
+  [Schematic](#schematic) describes. As JLC ships it, the underside pads are numbered down each
+  column, so the test pads would land on MTMS and MTCK instead of EN and BOOT.
 
 ## Layout
 
@@ -127,7 +128,7 @@ leaves the XIAO's LEDs and buttons uncovered, and makes the band about 10 mm thi
 
 | Function | Part | LCSC | Price | Notes |
 |---|---|---|---|---|
-| MCU + radio | XIAO ESP32C6 (Seeed 113991254) | [C27675191](https://jlcpcb.com/partdetail/Seeed-113991254/C27675191) | ~$7.43 | **98 in stock.** Pre-order 10 into JLC's parts library. It has no EasyEDA footprint, so import Seeed's. |
+| MCU + radio | XIAO ESP32C6 (Seeed 113991254) | [C27675191](https://jlcpcb.com/partdetail/Seeed-113991254/C27675191) | ~$7.43 | **98 in stock.** Pre-order 10 into JLC's parts library. It has no EasyEDA footprint; bind C9900124963's, renumbered (see [Schematic](#schematic)). |
 | PPG | MAX30101EFD+T | [C2859066](https://jlcpcb.com/partdetail/C2859066) | ~$8 | **132 at JLC.** Pre-order. Unsealed optical package (see [Ordering](#ordering)). |
 | EDA ADC | ADS1115IDGSR | [C37593](https://jlcpcb.com/partdetail/C37593) | $1.23 | 16-bit, 4 channels |
 | EDA op-amp | OPA2333AIDGKR | [C19608](https://jlcpcb.com/partdetail/C19608) | $2.70 | Zero-drift, 70 pA bias. Leaded VSSOP kept on purpose: the leadless versions put a grounded pad 0.22 mm from the sense node on a board that can't be washed. |
@@ -415,18 +416,24 @@ come from each part's datasheet by hand.
 4. Bind a footprint to each part (Tools → Footprint Manager). A schematic imported on its own
    arrives without footprints. The `Supplier Part` C-numbers survive the import (checked
    2026-10-23), and symbol pin numbers are the datasheet's. Check these by hand:
-   - **XIAO:** copy the EasyEDA footprint of JLC part C9900124963 into the project library and renumber
-     its eight round underside pads by position, to Seeed's numbering:
-     - **The two columns.** The column nearer the D0–D6 edge pads (1–7) reads 15, 17, 19, 21, from
-       the USB end (where pads 1 and 14 sit). The other column reads 16, 18, 20, 22.
-     - **Why.** JLC's copy numbers them down each column instead, so its 17 and 21 sit on the MTMS
-       and MTCK pads rather than EN and BOOT.
-     - **Unchanged.** Edge pads 1–14 and the battery pads already match. Pad 23 (BAT+) is the one
-       nearer D0–D6.
-     - **Reference geometry.** C27675191 itself has no EasyEDA footprint. EasyEDA Pro's in-editor
-       KiCad import refused both Seeed's KiCad 9 file and a KiCad 5 conversion
+   - **XIAO:** bind the EasyEDA footprint of JLC part C9900124963, then renumber its eight round
+     underside pads to Seeed's numbering. C27675191 itself has no EasyEDA footprint.
+     - **Bind.** Search C9900124963 in the library (Shift+F) to see its footprint's name. Select U1,
+       click the footprint box in the right-hand panel (it opens the Footprint Manager) and pick that
+       footprint. The project library then holds a copy. System-library footprints can't be edited,
+       but the copy can.
+     - **Renumber.** Open the copy: right-click it in the bottom panel's Project Library, or right-click
+       U1 in the PCB. Pads 1 and 14 mark the USB end. From that end, the column of round pads nearer
+       pads 1–7 must read 15, 17, 19, 21, and the other column 16, 18, 20, 22. JLC numbers them down
+       each column, so six change: 16→17, 17→19, 18→21, 19→16, 20→18 and 21→20. Edge pads 1–14 and
+       the battery pads already match. Pad 23 (BAT+) is the one nearer pads 1–7.
+     - **Check,** once the PCB exists: in that column, the round pad second from the USB end shows net
+       XIAO_EN and the fourth shows XIAO_BOOT. If Design → Update Project Library offers to update
+       this footprint, decline, or it may bring back JLC's numbering.
+     - **Why not Seeed's file.** EasyEDA Pro's KiCad import refused both Seeed's KiCad 9 footprint and
+       a KiCad 5 conversion
        ([footprints/XIAO-ESP32-C6-SMD.kicad_mod](schematic/footprints/XIAO-ESP32-C6-SMD.kicad_mod),
-       `deno task footprints`). That conversion is kept as the reference geometry: Seeed's 24 pads,
+       `deno task footprints`). The conversion stays as the reference geometry: Seeed's 24 pads,
        unchanged.
    - **Exposed pads:** MAX17048 pad 9 and TPS61099 pad 7 go to GND. TMP117 pad 7 is TEMP_PAD:
      pasted and soldered, joined only to TC1's vias. Some footprints call an exposed pad `EP`
