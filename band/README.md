@@ -426,8 +426,10 @@ come from each part's datasheet by hand.
      - **D5:** LCSC's footprint puts the anode on pad 1, as `band.ts` does.
      - **SW1:** pad 2 is the centre tail, which G-Switch's drawing makes the common.
      - **J2:** the pad numbers and positions match XKB's drawing (see [Open questions](#open-questions)).
-     - **U4:** bind only the footprint. LCSC's symbol for C21659 swaps VIN and VOUT against Torex's
-       datasheet (1 VSS, 2 VOUT, 3 VIN), which `band.ts` follows.
+     - **U4:** keep the imported symbol and change only its footprint, as for every other part. Don't
+       replace U4 with LCSC's C21659 device: its symbol labels pin 2 VIN and pin 3 VOUT, the reverse
+       of Torex's datasheet (1 VSS, 2 VOUT, 3 VIN), which `band.ts` follows. In the PCB, the
+       SOT-23's lone pin (pad 3) shows net 3V3.
    - **XIAO:** bind the EasyEDA footprint of JLC part C9900124963, then renumber its eight round
      underside pads to Seeed's numbering. C27675191 itself has no EasyEDA footprint.
      - **Bind.** Select U1, click the footprint box in the right-hand panel (it opens the Footprint
