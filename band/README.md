@@ -88,16 +88,25 @@ regulator and a certified radio, so the carrier has no RF or charging design to 
 
 ## Layout
 
-**Board:** 4-layer FR-4, 0.8 mm, ENIG, about **21 × 67 mm**. It runs along the forearm, with the XIAO
-end toward the elbow and the cell beside the XIAO, not on top of it. That keeps the antenna clear,
-leaves the XIAO's LEDs and buttons uncovered, and makes the band about 10 mm thick instead of 15.
+**Board:** 4-layer FR-4, 0.8 mm, ENIG, **21 × 67 mm** with 1.5 mm corner radii. It runs along the
+forearm, with the XIAO end toward the elbow and the cell beside the XIAO, not on top of it. That keeps
+the antenna clear, leaves the XIAO's LEDs and buttons uncovered, and makes the band about 10 mm thick
+instead of 15.
+
+**Outline.** `deno task outline` writes [out/band-outline.dxf](schematic/out/band-outline.dxf) and a
+preview, [band-outline.svg](schematic/out/band-outline.svg).
+- In EasyEDA Pro, use File → Import → DXF and bring both of its layers onto the board outline layer.
+  `OUTLINE` is the board. `TAB_SLOTS` holds the two slots, which EasyEDA cuts out.
+- Tools → Measure Distance (Ctrl+M) between opposite corners should read 67 × 21 mm.
+- If the outline arrives as loose lines and arcs, select them, right-click and choose Merge as closed
+  object.
 
 | Zone, along the forearm | Top side | Skin side |
 |---|---|---|
 | 0–19 mm, XIAO end | XIAO. USB-C and the antenna face opposite side walls. | LED boost (U3, L1, C4–C6, R10–R13), LSM6DSOX, MAX17048, USB divider, kept at least 12 mm from the EDA block |
 | 13–30 mm, under the XIAO edge and the jack strip | J2, SW1, J1, and the status LED (D5, R23) under a lid light pipe, in the strip beside the XIAO | EDA front end: U8, U9, U10, R14–R22, C15–C21, D1–D4, TP1–TP3 |
 | 29–63 mm, sensor section | The cell on 0.1 mm foam. No parts. | E1, the PPG window (U5, C8–C11, U4, C7) and E2 in a line, about 20 mm apart, under the strap |
-| 63–67 mm, tab | TMP117 (U7, C14) on a slotted tab, under closed-cell foam | TC1, the skin temperature pad |
+| 63–67 mm, tab, behind slots at 62–63 mm | TMP117 (U7, C14) on a slotted tab, under closed-cell foam | TC1, the skin temperature pad |
 
 **Thickness.** About 10.3 mm over the cell section and 8.9 mm over the XIAO end. The case is about
 25 × 69 mm.
@@ -119,8 +128,10 @@ leaves the XIAO's LEDs and buttons uncovered, and makes the band about 10 mm thi
   R22 and C21 at U9 pins 4–5.
 - **Loud loops.** Keep the boost loop (C4, L1, C5/C6 at U3) tight, and C10/C11 at U5 pins 9/10 with
   their via to PGND.
-- **The TMP117 tab.** 1.0 mm slots around it. Only V+, GND, SDA and SCL cross its neck. A case boss
-  supports it so contact pressure can't bend it.
+- **The TMP117 tab.** Two 1.0 mm slots across the board at 62–63 mm leave it joined by a 4 mm neck in
+  the middle and a 1.5 mm bridge at each edge. Only V+, GND, SDA and SCL cross the neck. Keep copper
+  off the bridges, and stop the inner planes at the slots. A case boss supports the tab so contact
+  pressure can't bend it.
 - **Jack and switch.** J2's nose and SW1's lever pass through case walls clear of the strap. A case
   rib behind J2 takes the plug's force (up to 20 N), so the solder joints don't.
 
@@ -463,8 +474,9 @@ come from each part's datasheet by hand.
    - **Footprints to draw.** The parts with nothing to buy need three footprints, each a single pad
      numbered 1. Give them these names, so that step 5 matches them:
      - `TP_1.0mm` for TP1–TP5: a 1.0 mm round pad.
-     - `TEMP_SKIN_PAD` for TC1: a 4 × 4 mm pad with no solder paste, because the case contact is
-       bonded to it through a thermal pad, not soldered.
+     - `TEMP_SKIN_PAD` for TC1: a 3.2 × 4.4 mm pad with no solder paste, because the case contact is
+       bonded to it through a thermal pad, not soldered. The 3.2 mm side runs along the board, which
+       leaves 0.4 mm to the slots and to the end of the 4 mm tab.
      - `ELECTRODE_CONTACT` for E1 and E2: a 4 mm round pad for now, until the case design settles how
        the wrist contacts reach the board.
    - **R13** is DNP but keeps its land: bind `R0402`. None of the no-buy parts or R13 is in the BOM.
