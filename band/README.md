@@ -415,7 +415,19 @@ come from each part's datasheet by hand.
    connections.
 4. Bind a footprint to each part (Tools → Footprint Manager). A schematic imported on its own
    arrives without footprints. The `Supplier Part` C-numbers survive the import (checked
-   2026-10-23), and symbol pin numbers are the datasheet's. Check these by hand:
+   2026-10-23), and symbol pin numbers are the datasheet's.
+   - **Library parts.** Every part with an LCSC number except U1 binds the footprint that its number
+     uses in EasyEDA's library, which `band.ts` names. The Footprint Manager can bind a group at once,
+     such as every `R0402`. Each of these footprints was checked against `band.ts` on 2026-10-23:
+     - Every pin has a pad of the same number. The pads `band.ts` leaves off are mounting tabs and
+       stay unconnected: J1 3–4 and SW1 4–7.
+     - The exposed pads are numbered as `band.ts` expects. MAX17048 9 and TPS61099 7 go to GND.
+       TMP117 7 is TEMP_PAD: pasted and soldered, joined only to TC1's vias.
+     - **D5:** LCSC's footprint puts the anode on pad 1, as `band.ts` does.
+     - **SW1:** pad 2 is the centre tail, which G-Switch's drawing makes the common.
+     - **J2:** the pad numbers and positions match XKB's drawing (see [Open questions](#open-questions)).
+     - **U4:** bind only the footprint. LCSC's symbol for C21659 swaps VIN and VOUT against Torex's
+       datasheet (1 VSS, 2 VOUT, 3 VIN), which `band.ts` follows.
    - **XIAO:** bind the EasyEDA footprint of JLC part C9900124963, then renumber its eight round
      underside pads to Seeed's numbering. C27675191 itself has no EasyEDA footprint.
      - **Bind.** Select U1, click the footprint box in the right-hand panel (it opens the Footprint
@@ -443,17 +455,20 @@ come from each part's datasheet by hand.
        ([footprints/XIAO-ESP32-C6-SMD.kicad_mod](schematic/footprints/XIAO-ESP32-C6-SMD.kicad_mod),
        `deno task footprints`). The conversion stays as the reference geometry: Seeed's 24 pads,
        unchanged.
-   - **Exposed pads:** MAX17048 pad 9 and TPS61099 pad 7 go to GND. TMP117 pad 7 is TEMP_PAD:
-     pasted and soldered, joined only to TC1's vias. Some footprints call an exposed pad `EP`
-     instead of a number.
-   - **ESD diodes D1–D4:** use TI's DPY0002A land (two 0.30 × 0.50 mm pads on 0.70 mm centres). The
-     LCSC footprint's 0.25 mm gap invites bridges.
-   - **Status LED D5:** check that pad 1 is the anode.
-   - **Slide switch:** pad 2 must be the centre (common) tail.
-   - **Jack:** see [Open questions](#open-questions).
-   - **No-buy parts:** E1/E2 (wrist contacts), TC1 (skin pad) and TP1–TP5 (test points) have no LCSC
-     number. R13 is marked DNP. None of these is in the BOM.
-5. Run the design check, then update the PCB from the schematic.
+   - **ESD diodes D1–D4:** after binding `X1SON-2_L1.0-W0.6-P0.65-RD-1`, edit its project copy to TI's
+     DPY0002A land: both pads 0.30 × 0.50 mm, centred at ±0.35 mm. LCSC's pads are 0.40 × 0.60 mm at
+     ±0.32 mm, and their 0.24 mm gap invites bridges.
+   - **Footprints to draw.** The parts with nothing to buy need three footprints, each a single pad
+     numbered 1. Give them these names, so that step 5 matches them:
+     - `TP_1.0mm` for TP1–TP5: a 1.0 mm round pad.
+     - `TEMP_SKIN_PAD` for TC1: a 4 × 4 mm pad with no solder paste, because the case contact is
+       bonded to it through a thermal pad, not soldered.
+     - `ELECTRODE_CONTACT` for E1 and E2: a 4 mm round pad for now, until the case design settles how
+       the wrist contacts reach the board.
+   - **R13** is DNP but keeps its land: bind `R0402`. None of the no-buy parts or R13 is in the BOM.
+5. **Check the bindings.** Export the netlist again and run `deno task diff-netlist`. With every
+   footprint bound as above, it lists no footprint names that differ from `band.ts`.
+6. Run the design check, then update the PCB from the schematic.
 
 **Which file is the master:**
 - **Until layout starts,** `band.ts` is the source of truth: change it and rebuild, then re-import.
@@ -494,12 +509,15 @@ come from each part's datasheet by hand.
 
 ## Open questions
 
-1. **Jack contacts.** XKB's drawing for the PJ-3701-SMT doesn't name its contacts. The mapping is
-   inferred from the contact positions: 4 tip, 3 ring, 1 and 2 sleeve, and 5–6 detect, closed with no
-   plug. Check two or three loose jacks with a plug and a meter before ordering.
+1. **Jack contacts.** XKB's drawing (rev A1, 2025-06-26) has a plug-out schematic that agrees with
+   `band.ts`: 1 sleeve, 2 ring 2 (the sleeve, on a three-pole plug), 3 ring 1, 4 tip, and 5–6 a
+   detect switch, closed with no plug and isolated from the rest. LCSC's footprint numbers its pads
+   the same way. The drawing still doesn't name the contacts, so check one or two loose jacks with a
+   plug and a meter before ordering.
 2. **Cells.** Find a protected cell of at most 6.0 × 25 × 34 mm with a JST-SH plug wired pin 1 = BAT+,
    or re-terminate one. Polarity varies by vendor.
 3. **Measured draw.** The first build's real current sets the final cell size.
-4. **Case and strap.** The mechanical design, to the case notes above.
+4. **Case and strap.** The mechanical design, to the case notes above. It also decides how the wrist
+   contacts reach E1 and E2, whose board pads are 4 mm placeholders.
 5. **Firmware** (see [FIRMWARE.md](FIRMWARE.md)), and the workbench's band intake, are not written
    yet.

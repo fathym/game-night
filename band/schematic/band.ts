@@ -2,7 +2,8 @@
  * The band's circuit: every part, its LCSC number, and the net on each pin. The design behind it is
  * in ../README.md and the firmware contract in ../FIRMWARE.md. Pin numbers come from each part's own
  * datasheet (the XIAO's from Seeed's XIAO-ESP32-C6-SMD footprint) and must match the footprint
- * bound in EasyEDA Pro.
+ * bound in EasyEDA Pro. Footprint names are the ones EasyEDA's library uses for each LCSC number, so
+ * `deno task diff-netlist` shows any part bound to a different one.
  *
  * A pin marked NC is unconnected on purpose and gets a no-connect flag; the build fails on any pin
  * that has neither a net nor NC.
@@ -145,7 +146,7 @@ const power: Block = {
     {
       ref: "J1",
       value: "SM02B-SRSS-TB (check cell polarity)",
-      footprint: "CONN-SMD_P1.00_SM02B-SRSS-TB",
+      footprint: "CONN-SMD_2P-P1.00_SM02B-SRSS-TB-LF-SN",
       lcsc: "C160402",
       manufacturer: "JST",
       mpn: "SM02B-SRSS-TB(LF)(SN)",
@@ -206,12 +207,13 @@ const power: Block = {
 };
 
 const mcu: Block = {
-  title: "XIAO ESP32C6 on Seeed's SMD footprint (underside pads 15, 16, 18, 19, 20, 22 unused)",
+  title: "XIAO ESP32C6 with Seeed's pad numbers (underside pads 15, 16, 18, 19, 20, 22 unused)",
   parts: [
     {
       ref: "U1",
       value: "XIAO ESP32C6",
-      footprint: "XIAO-ESP32-C6-SMD",
+      // JLC's footprint for C9900124963, with its underside pads renumbered to Seeed's (see the README).
+      footprint: "LCC-14P_L17.7-W20.8-XIAO-ESP32-C6",
       lcsc: "C27675191",
       manufacturer: "Seeed Studio",
       mpn: "113991254",
