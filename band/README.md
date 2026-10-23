@@ -468,8 +468,11 @@ come from each part's datasheet by hand.
      - `ELECTRODE_CONTACT` for E1 and E2: a 4 mm round pad for now, until the case design settles how
        the wrist contacts reach the board.
    - **R13** is DNP but keeps its land: bind `R0402`. None of the no-buy parts or R13 is in the BOM.
-5. **Check the bindings.** Export the netlist again and run `deno task diff-netlist`. With every
-   footprint bound as above, it lists no footprint names that differ from `band.ts`.
+5. **Check the bindings.** The Footprint Manager marks any part whose footprint is missing or whose
+   pins don't all have pads. Then export the netlist again and run `deno task diff-netlist`. It lists
+   any part bound to a footprint whose name differs from `band.ts`, and any extra part, such as a
+   library part placed by accident. It can't spot an unbound part: until a footprint is bound,
+   EasyEDA exports the name from the import.
 6. Run the design check, then update the PCB from the schematic.
 
 **Which file is the master:**
