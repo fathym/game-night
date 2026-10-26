@@ -88,28 +88,32 @@ regulator and a certified radio, so the carrier has no RF or charging design to 
 
 ## Layout
 
-**Board:** 4-layer FR-4, 0.8 mm, ENIG, **21 × 67 mm** with 1.5 mm corner radii. It runs along the
+**Board:** 4-layer FR-4, 0.8 mm, ENIG, **67 × 38 mm** with 1.5 mm corner radii. It runs along the
 forearm, with the XIAO end toward the elbow and the cell beside the XIAO, not on top of it. That keeps
 the antenna clear, leaves the XIAO's LEDs and buttons uncovered, and makes the band about 10 mm thick
-instead of 15.
+instead of 15. The board is wider than its parts need so that the strap can thread through slots in
+it, because the first prototypes have no case.
 
 **Outline.** `deno task outline` writes [out/band-outline.dxf](schematic/out/band-outline.dxf) and a
 preview, [band-outline.svg](schematic/out/band-outline.svg).
-- In EasyEDA Pro, use File → Import → DXF and bring both of its layers onto the board outline layer.
-  `OUTLINE` is the board. `TAB_SLOTS` holds the two slots, which EasyEDA cuts out.
-- Tools → Measure Distance (Ctrl+M) between opposite corners should read 67 × 21 mm.
+- In EasyEDA Pro, use File → Import → DXF and bring all three of its layers onto the board outline
+  layer. `OUTLINE` is the board. `STRAP_SLOTS` and `TAB_SLOTS` hold slots, which EasyEDA cuts out.
+- Tools → Measure Distance (Ctrl+M) between opposite corners should read 67 × 38 mm.
 - If the outline arrives as loose lines and arcs, select them, right-click and choose Merge as closed
   object.
+- **Strap slots:** 22 × 3 mm, one along each long edge at 35–57 mm, centred on the PPG for a 20 mm
+  strap. Each sits 1 mm outside the widest cell (25 mm) and leaves a 2.5 mm bar at the edge to take
+  the strap's pull.
 
 | Zone, along the forearm | Top side | Skin side |
 |---|---|---|
-| 0–19 mm, XIAO end | XIAO. USB-C and the antenna face opposite side walls. | LED boost (U3, L1, C4–C6, R10–R13), LSM6DSOX, MAX17048, USB divider, kept at least 12 mm from the EDA block |
+| 0–19 mm, XIAO end | XIAO, with USB-C flush with a long edge. Its antenna end then faces into the board: keep copper off every layer for 10 mm beyond it. | LED boost (U3, L1, C4–C6, R10–R13), LSM6DSOX, MAX17048, USB divider, kept at least 12 mm from the EDA block |
 | 13–30 mm, under the XIAO edge and the jack strip | J2, SW1, J1, and the status LED (D5, R23) under a lid light pipe, in the strip beside the XIAO | EDA front end: U8, U9, U10, R14–R22, C15–C21, D1–D4, TP1–TP3 |
 | 29–63 mm, sensor section | The cell on 0.1 mm foam. No parts. | E1, the PPG window (U5, C8–C11, U4, C7) and E2 in a line, about 20 mm apart, under the strap |
 | 63–67 mm, tab, behind slots at 62–63 mm | TMP117 (U7, C14) on a slotted tab, under closed-cell foam | TC1, the skin temperature pad |
 
-**Thickness.** About 10.3 mm over the cell section and 8.9 mm over the XIAO end. The case is about
-25 × 69 mm.
+**Thickness.** About 10.3 mm over the cell section and 8.9 mm over the XIAO end. The first prototypes
+have no case (see [Wearing and charging](#wearing-and-charging)).
 
 **Layout rules:**
 - **Skin side.** Every part on the skin side except U5 must be 1.40 mm or less. Only E1, E2, the PPG
@@ -391,6 +395,14 @@ This section is for players; copy it into [PLAYERS.md](../PLAYERS.md) when bands
 - **Between players.** Wipe the case back and contacts with 70% isopropyl alcohol. Never bleach or
   ammonia on Ag/AgCl.
 
+**Prototypes without a case:**
+- Thread the strap through the board's two slots, with the skin side against the wrist.
+- Cover the skin side with polyimide (Kapton) tape everywhere except U5's window. Skin touching any
+  other copper adds leakage paths that corrupt EDA.
+- Keep E1, E2 and TC1 off bare skin. The board's ENIG finish is flash gold over nickel, which the
+  electrode notes above rule out. Use the finger lead for EDA, or stick Ag/AgCl electrodes onto E1
+  and E2, and put a thin insulating thermal pad over TC1.
+
 **Case notes for whoever designs it:**
 - Seal every case-back opening: an O-ring or potting around each contact and the temperature
   contact, and a gasket around the PPG window.
@@ -496,8 +508,8 @@ come from each part's datasheet by hand.
 ## Ordering
 
 - **Board.** 4-layer FR-4, 0.8 mm, ENIG.
-- **Panel.** A single 21 × 67 mm board is below the 70 × 70 mm minimum for Standard PCBA, so order
-  panels: 3 × 1 with 5 mm rails.
+- **Panel.** A single 67 × 38 mm board is below the 70 × 70 mm minimum for Standard PCBA, so order
+  panels: 2 × 1 with 5 mm rails, which makes 8 boards from 4 panels.
   - Put the rails, fiducials and tooling holes only on edges with no overhanging part.
   - Leave a routed gap of at least 3 mm in front of the USB-C, J2 and SW1 overhangs.
   - Use mouse bites only on plain edges.

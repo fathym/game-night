@@ -1,17 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 82 31" width="984" height="372">
-<rect width="82" height="31" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 83 50" width="996" height="600">
+<rect width="83" height="50" fill="#fff"/>
+<rect x="11" y="26.9" width="17.7" height="10" fill="#f3e3c3" stroke="none"/>
+<rect x="11" y="6.1" width="17.7" height="20.8" fill="none" stroke="#888" stroke-width="0.15" stroke-dasharray="0.8 0.6"/>
+<rect x="39" y="12.5" width="34" height="25" fill="none" stroke="#888" stroke-width="0.15" stroke-dasharray="0.8 0.6"/>
 <g fill="none" stroke-width="0.2" stroke-linejoin="round">
-<path d="M 11.5 26 L 75.5 26 L 75.5 26 A 1.5 1.5 0 0 0 77 24.5 L 77 24.5 L 77 6.5 L 77 6.5 A 1.5 1.5 0 0 0 75.5 5 L 75.5 5 L 11.5 5 L 11.5 5 A 1.5 1.5 0 0 0 10 6.5 L 10 6.5 L 10 24.5 L 10 24.5 A 1.5 1.5 0 0 0 11.5 26 Z" stroke="#1a1a1a"/>
-<path d="M 73 24 L 73 18 L 73 18 A 0.5 0.5 0 0 0 72 18 L 72 18 L 72 24 L 72 24 A 0.5 0.5 0 0 0 73 24 Z" stroke="#c0392b"/>
-<path d="M 73 13 L 73 7 L 73 7 A 0.5 0.5 0 0 0 72 7 L 72 7 L 72 13 L 72 13 A 0.5 0.5 0 0 0 73 13 Z" stroke="#c0392b"/>
+<path d="M 11.5 44 L 75.5 44 L 75.5 44 A 1.5 1.5 0 0 0 77 42.5 L 77 42.5 L 77 7.5 L 77 7.5 A 1.5 1.5 0 0 0 75.5 6 L 75.5 6 L 11.5 6 L 11.5 6 A 1.5 1.5 0 0 0 10 7.5 L 10 7.5 L 10 42.5 L 10 42.5 A 1.5 1.5 0 0 0 11.5 44 Z" stroke="#1a1a1a"/>
+<path d="M 46.5 41.5 L 65.5 41.5 L 65.5 41.5 A 1.5 1.5 0 0 0 65.5 38.5 L 65.5 38.5 L 46.5 38.5 L 46.5 38.5 A 1.5 1.5 0 0 0 46.5 41.5 Z" stroke="#2e6db4"/>
+<path d="M 46.5 11.5 L 65.5 11.5 L 65.5 11.5 A 1.5 1.5 0 0 0 65.5 8.5 L 65.5 8.5 L 46.5 8.5 L 46.5 8.5 A 1.5 1.5 0 0 0 46.5 11.5 Z" stroke="#2e6db4"/>
+<path d="M 73 42 L 73 27.5 L 73 27.5 A 0.5 0.5 0 0 0 72 27.5 L 72 27.5 L 72 42 L 72 42 A 0.5 0.5 0 0 0 73 42 Z" stroke="#c0392b"/>
+<path d="M 73 22.5 L 73 8 L 73 8 A 0.5 0.5 0 0 0 72 8 L 72 8 L 72 22.5 L 72 22.5 A 0.5 0.5 0 0 0 73 22.5 Z" stroke="#c0392b"/>
 </g>
 <g font-family="sans-serif" font-size="1.6" fill="#333">
-<text x="43.5" y="29" text-anchor="middle">67 mm</text>
-<text x="9" y="16.1" text-anchor="end">21 mm</text>
-<text x="11" y="3.8" text-anchor="start">R1.5 corners</text>
-<text x="19.5" y="16.1" text-anchor="middle">XIAO end</text>
-<text x="75" y="16.1" text-anchor="middle">tab</text>
-<text x="77" y="3.8" text-anchor="end">1 mm slots at x 62–63</text>
-<text x="77" y="29" text-anchor="end">neck 4 mm, bridges 1.5 mm</text>
+<text x="43.5" y="47.5" text-anchor="middle">67 mm</text>
+<text x="9" y="25.6" text-anchor="end">38 mm</text>
+<text x="11" y="4.5" text-anchor="start">R1.5 corners</text>
+<text x="56" y="4.5" text-anchor="middle">strap slots 22 × 3 mm</text>
+<text x="77" y="4.5" text-anchor="end">tab slots 1 mm</text>
+<text x="19.85" y="10.1" text-anchor="middle">XIAO</text>
+<text x="19.85" y="12.6" text-anchor="middle">USB-C at top edge</text>
+<text x="19.85" y="31.4" text-anchor="middle">no copper:</text>
+<text x="19.85" y="33.4" text-anchor="middle">antenna</text>
+<text x="56" y="25.6" text-anchor="middle">cell, up to 34 × 25 mm</text>
+<text x="75" y="25.6" text-anchor="middle">tab</text>
+<text x="77" y="47.5" text-anchor="end">tab neck 4 mm, bridges 1.5 mm</text>
 </g>
 </svg>
