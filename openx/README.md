@@ -37,9 +37,8 @@ becomes a new device with new keys, and every band would need re-provisioning.
 
 1. **Workspace → View All... → + Create New Workspace.** Name it `game-night` and click **Create**.
    OpenX switches you into it.
-2. **Keep the team to the hosts.** OpenX doesn't partition raw telemetry within a workspace, and its
-   warm-query routes check no rights. So anyone on the team can read every player's biometrics.
-   Invite only people who may (Workspace → **Team Members**).
+2. **Keep the team to the hosts.** Everyone on the workspace's team can read all of its telemetry,
+   every player's biometrics included. Invite only people who may (Workspace → **Team Members**).
 
    The Role picker in the invite form isn't applied: every invited member is added as a non-owner,
    whatever it says. After inviting, reopen the dialog to confirm the person is listed: the
@@ -162,15 +161,15 @@ What OpenX owns and what's safe to touch:
 ## Step 8: API keys and file rights
 
 **APIs → API Keys** mints a JWT:
-- **Lifetime.** At most 30 days. Keys can't be revoked: OpenX stores no list of them, despite what its
-  docs say. Keep lifetimes short and set a monthly reminder to re-mint.
+- **Lifetime.** At most 30 days. Keep lifetimes short, keep keys out of anything shared, and set a
+  monthly reminder to re-mint.
 - **Scopes.** The scope checkboxes start with all your rights ticked. Untick everything a key doesn't
   need.
 
 | Key for | Rights | Goes to |
 |---|---|---|
 | Voice bot audio uploads | `Workspace.Files.Write` | `GAMENIGHT_OX_TOKEN` in the voice bot's settings |
-| The hosted workbench | warm queries (no right is enforced yet) | `FATHYM_OX_SERVICE_JWT` in the workbench's Environment (Step 9) |
+| The hosted workbench | warm queries | `FATHYM_OX_SERVICE_JWT` in the workbench's Environment (Step 9) |
 | Calling the workbench from Claude Code | `Workspace.Workbench.Host` | Your MCP client's settings |
 
 **Caveat:** the owner card a new workspace starts with carries only data-store rights, not

@@ -33,8 +33,8 @@ band ──MQTT/TLS 8883 (HTTPS fallback)──► IoT Hub ──► ADX table D
 
 - **A dedicated OpenX workspace.** Game night has its own workspace with private IoT: a landing
   zone, IoT Hub and ADX in your Azure subscription. OpenX refuses telemetry queries on its shared
-  store. Raw telemetry isn't partitioned within a workspace, so the separate workspace is the
-  privacy boundary for players' biometrics.
+  store. Everyone on a workspace's team can read all of its telemetry, so the separate workspace is
+  the privacy boundary for players' biometrics.
 - **One Data Connection per band.** Each band gets its own device identity, and OpenX stores its
   messages in `Devices(DeviceID, EnqueuedTime, MessageID, RawData)`. `EnqueuedTime` is IoT Hub's
   arrival time on Azure's clock, the same for every sender, including the Impostor plugin and the

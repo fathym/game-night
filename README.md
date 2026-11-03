@@ -35,8 +35,8 @@ Voice bot (audio) ──────────────────► Open
   also set `recording` and a session ID in each band's and bridge's device twin, so wearables stream
   only during a session.
 - **Audio.** Utterance audio goes to the workspace's file storage. Its metadata travels as telemetry.
-- **Privacy.** The workspace is the boundary for raw biometrics and voice. OpenX doesn't partition raw
-  telemetry within a workspace, so game night gets its own, with only the hosts on its team. Setup is
+- **Privacy.** The workspace is the boundary for raw biometrics and voice: everyone on its team can
+  read all of its telemetry. So game night gets its own, with only the hosts on its team. Setup is
   in [openx/README.md](openx/README.md).
 
 ## Where things run
