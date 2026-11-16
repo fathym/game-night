@@ -112,8 +112,9 @@ preview, [band-outline.svg](schematic/out/band-outline.svg).
 | 29–63 mm, sensor section | The cell on 0.1 mm foam. No parts. | E1, the PPG window (U5, C8–C11, U4, C7) and E2 in a line, about 20 mm apart, under the strap |
 | 63–67 mm, tab, behind slots at 62–63 mm | TMP117 (U7, C14) on a slotted tab, under closed-cell foam | TC1, the skin temperature pad |
 
-**Thickness.** About 10.3 mm over the cell section and 8.9 mm over the XIAO end. The first prototypes
-have no case (see [Wearing and charging](#wearing-and-charging)).
+**Thickness.** About 14 mm over the cell section with the prototypes' 9.5 mm cell, or 10.3 mm with a
+6 mm one, and 8.9 mm over the XIAO end. The first prototypes have no case (see
+[Wearing and charging](#wearing-and-charging)), and their cell is too thick for the planned one.
 
 **Layout rules:**
 - **Skin side.** Every part on the skin side except U5 must be 1.40 mm or less. Only E1, E2, the PPG
@@ -159,7 +160,7 @@ have no case (see [Wearing and charging](#wearing-and-charging)).
 | Power switch | MK-12C02-G020 (G-Switch) | [C963206](https://jlcpcb.com/partdetail/C963206) | $0.12 | Side-actuated SPDT, 1 A |
 | Battery connector | JST SM02B-SRSS-TB (SH, 1.0 mm) | [C160402](https://jlcpcb.com/partdetail/C160402) | $0.13 | 2.9 mm tall. Pin 1 is BAT+. |
 | Status LED | KT-0603R red, with 1 kΩ | [C2286](https://jlcpcb.com/partdetail/C2286) | $0.02 | On D6, active low |
-| Battery | Protected LiPo, at most 6.0 × 25 × 34 mm with an SH plug, ~450 mAh | — | ~$6 | Not on the BOM. Meter each cell's polarity before plugging it in. |
+| Battery | TinyCircuits ASR00035: protected LiPo, 500 mAh, 30 × 20 × 9.5 mm, JST-SH plug fitted | — | $6.95 (TinyCircuits, 2026-11-04) | Not on the BOM. Its plug is wired the opposite way to J1, so swap its two contacts first (see [Power](#power)). Meter each cell's polarity before plugging it in. |
 | Wrist contacts | Ag/AgCl discs, 8–10 mm | — | — | Reusable, fitted in the case back. Never nickel-plated. |
 | Finger lead | 3.5 mm TRS-to-snap lead + single-use isotonic Ag/AgCl electrodes | — | — | Consumable each night (e.g. BIOPAC EL507), not ECG pads |
 
@@ -351,8 +352,17 @@ wavelength least affected by motion.
   (about 25 µA at 40 °C, about 50 µA at 50 °C, typical). VBUS also gates the XIAO's own battery FET,
   so it has to stay near 0 V.
 
-**Battery and runtime.** A protected cell of at most 6.0 × 25 × 34 mm, about 450 mAh, with an SH
-plug.
+**Battery and runtime.** The prototypes use the TinyCircuits ASR00035: protected, 500 mAh,
+30 × 20 × 9.5 mm, 8 g, with a 37 mm lead and a JST-SH plug already fitted.
+- **Swap its plug's contacts first.** It comes wired black on pin 1, the opposite of J1. Swap its two
+  contacts so that BAT+ is in the triangle cavity, then meter it again.
+- **Mounting.** Stick the cell flat on the top side with double-sided foam tape, over the sensor
+  section, beside the XIAO and never on it, with its lead end toward J1. Tape its flat body, not the
+  taped end that holds its protection board. To remove it, cut through the tape with floss; never pry
+  it up or bend it.
+- **The plug.** SH has no latch. Tape the mated plug down, or hold it with a dab of RTV.
+- **The planned case** was drawn for a cell of at most 6.0 × 25 × 34 mm (about 450 mAh) with an SH lead
+  wired pin 1 = BAT+. This cell doesn't fit it.
 
 | Load | Average |
 |---|---|
@@ -360,8 +370,9 @@ plug.
 | MAX30101 with LEDs and boost | ~2–5 mA (estimate) |
 | Sensors, op-amps, switch, gauge | ~0.5 mA |
 
-That gives roughly 6–8 hours, comfortably more than a 4-hour night. Measure the first build before
-buying cells. A flat cell charges in about 4 hours at 120 mA.
+That is about 43–66 mA. With 85% of the 500 mAh usable, it gives an estimated 6.5–10 hours,
+comfortably more than a 4-hour night. The first build's measured current replaces the estimate. A flat
+cell charges in about 4–5 hours at 120 mA.
 
 **The switch.** The slide switch is in the battery line, so the band charges only when switched on.
 That's the price of a switch that guarantees zero drain in a drawer or in the post.
@@ -543,8 +554,8 @@ come from each part's datasheet by hand.
    detect switch, closed with no plug and isolated from the rest. LCSC's footprint numbers its pads
    the same way. The drawing still doesn't name the contacts, so check one or two loose jacks with a
    plug and a meter before ordering.
-2. **Cells.** Find a protected cell of at most 6.0 × 25 × 34 mm with a JST-SH plug wired pin 1 = BAT+,
-   or re-terminate one. Polarity varies by vendor.
+2. **Cells.** Settled for the prototypes: the TinyCircuits ASR00035, with its plug's contacts swapped
+   (see [Power](#power)). Polarity varies by vendor, so meter every plug.
 3. **Measured draw.** The first build's real current sets the final cell size.
 4. **Case and strap.** The mechanical design, to the case notes above. It also decides how the wrist
    contacts reach E1 and E2, whose board pads are 4 mm placeholders.
