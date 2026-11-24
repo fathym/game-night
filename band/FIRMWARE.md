@@ -309,6 +309,9 @@ The ROM boot log on UART0 also flickers the LED briefly at every reset.
 
 ## Bring-up checks (each band, before casing)
 
+[bringup/bringup.ino](bringup/bringup.ino) is an Arduino sketch that runs checks 1 to 6 before the firmware
+exists. Its first lines say how to use it. [BRINGUP.md](BRINGUP.md) has the steps in order, and the log.
+
 1. **On the cell alone,** USB unplugged and SW1 on: the band boots and the LED blinks. This proves
    the XIAO's hidden BAT+ joint.
 2. **I2C scan:** the bus shows 0x36, 0x48, 0x49, 0x57 and 0x6A.
