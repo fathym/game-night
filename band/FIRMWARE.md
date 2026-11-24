@@ -234,7 +234,8 @@ the band clock, and a fit restart sends a `reset` event.
 - Conductance = I / V.
   - I = (AIN0−AIN1 − offset) / 68 kΩ
   - V = AIN2−AIN3
-  - Subtract the 2 kΩ of series resistance and the switch's on-resistance from V / I before inverting.
+  - Subtract about 2.4 kΩ of series resistance from V / I before inverting: two 1 kΩ resistors, and two
+    channels of U10 at about 220 Ω each (typical at 3 V; its datasheet gives no maximum).
 - Keep a separate open-electrode offset per site. Capture it only when PPG and temperature agree
   the band has been off the wrist for a while AND the EDA reading itself is at leakage level
   (≤ 0.02 µS). Otherwise discard the capture.

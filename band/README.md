@@ -60,7 +60,7 @@ LiPo ─ JST-SH ─ switch ─ AO3401A ─► XIAO ESP32C6 ◄── USB-C
                                          ├─ status LED (D6)
                                          └─ OPA2333 front end ─ RC filter ─► ADS1115 (EDA)
                                                  ▲
-                               TMUX1133 electrode switch (open while USB power is present)
+                               DG4053E electrode switch (open while USB power is present)
                                  ▲                               ▲
                     wrist contacts (fallback)          3.5 mm jack (finger lead)
 ```
@@ -96,11 +96,12 @@ it, because the first prototypes have no case.
 
 **Outline.** `deno task outline` writes [out/band-outline.dxf](schematic/out/band-outline.dxf) and a
 preview, [band-outline.svg](schematic/out/band-outline.svg).
-- In EasyEDA Pro, use File → Import → DXF and bring all three of its layers onto the board outline
-  layer. `OUTLINE` is the board. `STRAP_SLOTS` and `TAB_SLOTS` hold slots, which EasyEDA cuts out.
-- Tools → Measure Distance (Ctrl+M) between opposite corners should read 67 × 38 mm.
-- If the outline arrives as loose lines and arcs, select them, right-click and choose Merge as closed
-  object.
+- In EasyEDA Standard, use File → Import → DXF, with mm and the BoardOutLine layer. `OUTLINE` is the
+  board. `STRAP_SLOTS` and `TAB_SLOTS` hold slots, which EasyEDA cuts out.
+- Measure it with M: it should read 67 × 38 mm.
+- **Keep only this outline on that layer.** JLC cuts along every closed shape there. Converting a
+  schematic to a PCB can draw another one, and the XIAO's library footprint hides one: delete both.
+- The 3D view doesn't show the slots as holes. The outline Gerber cuts them.
 - **Strap slots:** 22 × 3 mm, one along each long edge at 35–57 mm, centred on the PPG for a 20 mm
   strap. Each sits 1 mm outside the widest cell (25 mm) and leaves a 2.5 mm bar at the edge to take
   the strap's pull.
@@ -148,7 +149,7 @@ preview, [band-outline.svg](schematic/out/band-outline.svg).
 | PPG | MAX30101EFD+T | [C2859066](https://jlcpcb.com/partdetail/C2859066) | ~$8 | **132 at JLC.** Pre-order. Unsealed optical package (see [Ordering](#ordering)). |
 | EDA ADC | ADS1115IDGSR | [C37593](https://jlcpcb.com/partdetail/C37593) | $1.23 | 16-bit, 4 channels |
 | EDA op-amp | OPA2333AIDGKR | [C19608](https://jlcpcb.com/partdetail/C19608) | $2.70 | Zero-drift, 70 pA bias. Leaded VSSOP kept on purpose: the leadless versions put a grounded pad 0.22 mm from the sense node on a board that can't be washed. |
-| Electrode switch | TMUX1133PWR | [C1849385](https://jlcpcb.com/partdetail/C1849385) | $3.12 | 3× SPDT, 0.005 nA typical leakage. EN high opens everything. |
+| Electrode switch | DG4053EEQ-T1-GE3 (Vishay) | [C6183483](https://jlcpcb.com/partdetail/C6183483) | $1.81 (JLC, 2026-11-02) | 3× SPDT, 0.02 nA typical leakage. ENABLE high opens everything. It replaced the TMUX1133PWR (C1849385), which sold out before the first order and has the same pinout. |
 | Electrode ESD | ESD321DPYR ×4 | [C2868952](https://jlcpcb.com/partdetail/C2868952) | $0.14 | 0.1 nA typical. One-directional; the electrode lines stay above GND. |
 | Skin temperature | TMP117AIDRVR | [C699536](https://jlcpcb.com/partdetail/C699536) | $1.03 | ±0.1 °C max from −20 to 50 °C |
 | Movement reference | LSM6DSOXTR | [C481766](https://jlcpcb.com/partdetail/C481766) | $3.92 | Accelerometer at 26 Hz; gyro off; FIFO with 25 µs timestamps |
@@ -243,8 +244,8 @@ Research:
 - One ADC step (62.5 µV at ±2.048 V) is 0.92 nA, or 1.8 nS (0.0018 µS). That is finer than the
   smallest skin-conductance response counted (0.01 µS, which is 5 nA).
 
-**Electrode selection.** The TMUX1133 connects the front end to the wrist contacts or to the jack:
-- Channel 1 carries electrode A and channel 2 carries electrode B. Channel 3 is unused and tied to
+**Electrode selection.** The DG4053E connects the front end to the wrist contacts or to the jack:
+- Channel X carries electrode A and channel Y carries electrode B. Channel Z is unused and tied to
   GND.
 - The jack's detect contact is closed with no plug, which holds `PLUG_DET` low and selects the wrist.
   A plug opens it, the pull-up takes `PLUG_DET` high, and the switch moves to the jack's tip and ring.
@@ -267,16 +268,18 @@ Research:
 - **The 1 kΩ resistors.** They cap current from a failed switch or op-amp into the skin (at most about
   1.7 mA, far less through real skin) and limit ESD current into the switch. They don't limit
   current coming in from outside, because D1–D4 sit on the electrode side of them.
-- **On USB.** The TMUX1133's enable comes from USB power through the divider, not from firmware, so
-  the switch disconnects the front end whatever the code does. But D1–D4 still tie each electrode to
-  the band's ground, and so to the charger's, beyond −0.8 V and +4.5 V. **Take the band off to
-  charge it.** EDA reads open whenever USB power is present, power banks included.
+- **On USB.** The DG4053E's ENABLE comes from USB power through the divider, not from firmware, so
+  the switch disconnects the front end whatever the code does. At a 3 V supply it reads 1.4 V and up as
+  high and 0.6 V and down as low. The divider gives about 3.0 V on USB, and on battery about 0.25 V at
+  40 °C and 0.5 V at 50 °C, from the VBUS diode's leakage (calculated; see [Power](#power)). But D1–D4
+  still tie each electrode to the band's ground, and so to the charger's, beyond −0.8 V and +4.5 V.
+  **Take the band off to charge it.** EDA reads open whenever USB power is present, power banks included.
 
 **Leakage budget.** The smallest skin-conductance response counted is about 5 nA (0.01 µS). Against
 it:
 - the sense-side ESD diode: 0.1 nA typical, 10 nA max at 25 °C and 3.6 V, far less at 1.5 V
 - op-amp bias: 70 pA typical, 200 pA max
-- the switch: 5 pA typical, 100 pA max
+- the switch: 20 pA typical, 1 nA max at 25 °C and 3.3 V, 5 nA max up to 85 °C
 - ADC offset: ±2.8 nA
 - jack insulation: at least 100 MΩ, so up to 15 nA in lead mode
 - surface films: keep the sense node's leakage below 2.5 nA (above 600 MΩ), which is what the
@@ -440,7 +443,8 @@ Before writing, the build reads its own drawing back and fails unless:
 The check covers the drawing against `band.ts`, not `band.ts` against the real parts: pin numbers
 come from each part's datasheet by hand.
 
-**Importing into EasyEDA Pro:**
+**Importing into EasyEDA Pro.** The schematic was first imported and checked this way, on 2026-10-23.
+The board was then laid out in EasyEDA Standard, so a change to it doesn't need these steps.
 1. Open or create a project.
 2. Use File → Import → EasyEDA (Standard) and pick `band-easyeda.json`.
 3. **Check the import.** Export the netlist (File → Export → Netlist, "FreePCB for PCB") and run
@@ -512,9 +516,12 @@ come from each part's datasheet by hand.
 
 **Which file is the master:**
 - **Until layout starts,** `band.ts` is the source of truth: change it and rebuild, then re-import.
-- **Once a board layout exists,** re-importing means re-binding every footprint. From then on make
-  changes in EasyEDA Pro, mirror them in `band.ts`, and run `deno task diff-netlist` on Pro's
-  exported netlist before each order.
+- **Once a board layout exists,** re-importing means re-binding every footprint. From then on the board
+  document is the master, and `band.ts` mirrors it. This board's is an EasyEDA Standard PCB, since
+  2026-10-27. It isn't in this repo.
+- **Before each order,** the two must match exactly. `deno task diff-netlist` reads a netlist exported from
+  Pro. For a Standard board, run `diff()` from [diff-netlist.ts](schematic/diff-netlist.ts) on the pads and
+  nets in its file source (File → EasyEDA File Source).
 
 ## Ordering
 
