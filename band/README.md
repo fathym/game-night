@@ -3,8 +3,8 @@
 A wrist band that replaces EmotiBit at game night: one per player, worn at home, streaming skin
 conductance, pulse, skin temperature and wrist movement into OpenX through IoT Hub. This is the
 hardware design. The schematic is generated from [schematic/band.ts](schematic/band.ts) (see
-[Schematic](#schematic)), and the firmware contract is in [FIRMWARE.md](FIRMWARE.md). Nothing has been
-built yet.
+[Schematic](#schematic)), and the firmware contract is in [FIRMWARE.md](FIRMWARE.md). The first six
+boards came back assembled on 2026-11-20. As of 2026-11-23 none had been powered.
 
 Prices and stock below are from JLCPCB and LCSC on 2026-10-14. The assembly order draws on JLC's
 stock.
@@ -13,7 +13,7 @@ stock.
 
 | | Decided |
 |---|---|
-| Quantity | 6 to 8 bands, ordered assembled from JLCPCB (9 boards: three panels of three) |
+| Quantity | 6 to 8 bands, ordered assembled from JLCPCB (first order: six boards assembled and four bare, in five panels of two) |
 | Signals | EDA (the main signal); PPG for heart rate and beat intervals; skin temperature, for trends; a 3-axis accelerometer as the movement reference for scoring |
 | Electrodes | A finger lead through a 3.5 mm jack is the primary scoring site. Two contacts on the case back are the fallback when no lead is plugged in. Plugging in switches over in hardware. |
 | Wear | The back of the non-mouse wrist (see [Wearing and charging](#wearing-and-charging)) |
@@ -145,8 +145,8 @@ preview, [band-outline.svg](schematic/out/band-outline.svg).
 
 | Function | Part | LCSC | Price | Notes |
 |---|---|---|---|---|
-| MCU + radio | XIAO ESP32C6 (Seeed 113991254) | [C27675191](https://jlcpcb.com/partdetail/Seeed-113991254/C27675191) | ~$7.43 | **98 in stock.** Pre-order 10 into JLC's parts library. It has no EasyEDA footprint; bind C9900124963's, renumbered (see [Schematic](#schematic)). |
-| PPG | MAX30101EFD+T | [C2859066](https://jlcpcb.com/partdetail/C2859066) | ~$8 | **132 at JLC.** Pre-order. Unsealed optical package (see [Ordering](#ordering)). |
+| MCU + radio | XIAO ESP32C6 (Seeed 113991254) | [C27675191](https://jlcpcb.com/partdetail/Seeed-113991254/C27675191) | ~$7.43 | **98 in stock.** Pre-order one per band if payment has to wait. It has no EasyEDA footprint; bind C9900124963's, renumbered (see [Schematic](#schematic)). |
+| PPG | MAX30101EFD+T | [C2859066](https://jlcpcb.com/partdetail/C2859066) | ~$8 | **132 at JLC.** Pre-order likewise. Unsealed optical package (see [Ordering](#ordering)). |
 | EDA ADC | ADS1115IDGSR | [C37593](https://jlcpcb.com/partdetail/C37593) | $1.23 | 16-bit, 4 channels |
 | EDA op-amp | OPA2333AIDGKR | [C19608](https://jlcpcb.com/partdetail/C19608) | $2.70 | Zero-drift, 70 pA bias. Leaded VSSOP kept on purpose: the leadless versions put a grounded pad 0.22 mm from the sense node on a board that can't be washed. |
 | Electrode switch | DG4053EEQ-T1-GE3 (Vishay) | [C6183483](https://jlcpcb.com/partdetail/C6183483) | $1.81 (JLC, 2026-11-02) | 3× SPDT, 0.02 nA typical leakage. ENABLE high opens everything. It replaced the TMUX1133PWR (C1849385), which sold out before the first order and has the same pinout. |
@@ -163,7 +163,7 @@ preview, [band-outline.svg](schematic/out/band-outline.svg).
 | Status LED | KT-0603R red, with 1 kΩ | [C2286](https://jlcpcb.com/partdetail/C2286) | $0.02 | On D6, active low |
 | Battery | TinyCircuits ASR00035: protected LiPo, 500 mAh, 30 × 20 × 9.5 mm, JST-SH plug fitted | — | $6.95 (TinyCircuits, 2026-11-04) | Not on the BOM. Its plug is wired the opposite way to J1, so swap its two contacts first (see [Power](#power)). Meter each cell's polarity before plugging it in. |
 | Wrist contacts | Ag/AgCl discs, 8–10 mm | — | — | Reusable, fitted in the case back. Never nickel-plated. |
-| Finger lead | 3.5 mm TRS-to-snap lead + single-use isotonic Ag/AgCl electrodes | — | — | Consumable each night (e.g. BIOPAC EL507), not ECG pads |
+| Finger lead | SparkFun CAB-12970, 3.5 mm plug to snaps + single-use isotonic Ag/AgCl electrodes | — | $8.75 a lead (SparkFun, 2026-11-23) | Consumable each night (e.g. BIOPAC EL507), not ECG pads |
 
 Passives are JLC Basic parts in 0402 or 0603. The exceptions:
 - the two 22 µF boost capacitors are 0805 and Extended (C602037, because the earlier part is no
@@ -525,34 +525,45 @@ The board was then laid out in EasyEDA Standard, so a change to it doesn't need 
 
 ## Ordering
 
-- **Board.** 4-layer FR-4, 0.8 mm, ENIG.
-- **Panel.** A single 67 × 38 mm board is below the 70 × 70 mm minimum for Standard PCBA, so order
-  panels: 2 × 1 with 5 mm rails, which makes 8 boards from 4 panels.
+The steps, the settings, the off-board parts and what went wrong are in [ORDERING.md](ORDERING.md).
+
+- **Board.** 4-layer FR-4, 0.8 mm, ENIG, with the vias epoxy filled and capped.
+- **Panel.** A single 67 × 38 mm board is below the 70 × 70 mm minimum for Standard PCBA, so it is
+  ordered as our own 1 × 2 panel, 81 × 81 mm ("Panel by Customer"). JLC's own panels are V-cut only,
+  which leaves no room for the overhanging parts.
   - Put the rails, fiducials and tooling holes only on edges with no overhanging part.
   - Leave a routed gap of at least 3 mm in front of the USB-C, J2 and SW1 overhangs.
   - Use mouse bites only on plain edges.
-  - Three panels make 9 boards: 8 bands and a spare.
 - **Assembly.** Standard PCBA, double-sided:
-  - Reflow the skin side (most parts, including U5) first, then the top (U1, J1, J2, SW1, U7, C14).
+  - Reflow the skin side (most parts, including U5) first, then the top (U1, J1, J2, SW1, U7, C14, D5,
+    R23).
   - L1 is rated for two reflows; double-sided uses both.
-  - Copy this into the order remark: "Do not add board cleaning or conformal coating. U5 (MAX30101)
-    is an unsealed optical part: no washing or ultrasonic cleaning, no oven baking of U5 or the
-    assembled board (if its MSL3 floor life is exceeded, re-dry it in a dry cabinet), and keep flux
-    off its window."
-  - This departs from the datasheet's "install last" advice, which assumes a washed board.
-- **X-ray.** JLC requires X-ray for the LSM6DSOX (at least $13 an order). Optionally add X-ray for U1
-  ($1.64 a board), whose BAT+ joint under the module is the cell's only path to the XIAO.
-- **Pre-order** the XIAO and the MAX30101 into JLC's parts library before the board order.
+  - Upload only the whole-panel
+    [BOM](schematic/out/BOM_gameNightBand_panel_1x2_2026-11-02.csv) and
+    [placement file](schematic/out/PickAndPlace_gameNightBand_panel_1x2_2026-11-02.csv), never
+    `bom-jlcpcb.csv` or a file straight from the board tool. JLC doesn't repeat a single-board
+    placement file on a customer's panel, and it reads EasyEDA Standard's bottom-side rotations 180°
+    round at 0° and 180°, so every skin-side row is written as 180 − r.
+  - U5 (MAX30101) is an unsealed optical part: no washing, ultrasonic cleaning, conformal coating or
+    oven baking. The order remark in [ORDERING.md](ORDERING.md#3-assembly-options) says so. This departs
+    from the datasheet's "install last" advice, which assumes a washed board.
+- **X-ray.** JLC requires X-ray for the LSM6DSOX ($9.90 for six, JLC, 2026-10-30). The remark also asks
+  for U1, whose BAT+ joint under the module is the cell's only path to the XIAO.
+- **Pre-order** the XIAO and the MAX30101 into JLC's parts library, one of each per band, if the order
+  can't be paid while JLC has them in stock.
 - **Bring-up.** Each band gets the checks in [FIRMWARE.md](FIRMWARE.md#bring-up-checks-each-band-before-casing)
   before casing.
 
-**Cost.**
-- **Fees.** Standard PCBA charges $51.12 setup (double-sided), $16.42 stencil and $1.53 per unique
-  part, plus X-ray. That is about $16 a board over 9 boards.
-- **Per band.** About $35 of parts on the board, plus the cell, contacts, case, strap and lead:
-  roughly **$70–85 a band, or $600–700 for 8**, before shipping and import fees.
+**Cost,** for the first order of six assembled boards and four bare ones. [ORDERING.md](ORDERING.md) has
+every line.
+- **The quote.** $425.42 before shipping and duty (JLC, 2026-10-30): $205.77 of parts, $151.35 of
+  assembly fees and $68.30 for the bare panels. That is about $34 of parts and $25 of assembly fees a
+  band.
+- **The price.** $606.53 before sales tax (the order): $422.78 for the goods, $31.33 shipping, $147.98
+  duties and taxes, and a $4.44 disbursement fee. About $101 a band.
+- **Per band.** About **$117** with the cell ($6.95, TinyCircuits, 2026-11-04) and the finger lead ($8.75,
+  SparkFun, 2026-11-23), before the strap, the tape and their shipping.
 - **Consumables.** Single-use finger electrodes each night.
-- The real number comes from JLC's quote.
 
 ## Open questions
 
