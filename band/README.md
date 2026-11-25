@@ -4,7 +4,13 @@ A wrist band that replaces EmotiBit at game night: one per player, worn at home,
 conductance, pulse, skin temperature and wrist movement into OpenX through IoT Hub. This is the
 hardware design. The schematic is generated from [schematic/band.ts](schematic/band.ts) (see
 [Schematic](#schematic)), and the firmware contract is in [FIRMWARE.md](FIRMWARE.md). The first six
-boards came back assembled on 2026-11-20. As of 2026-11-23 none had been powered.
+boards came back assembled on 2026-11-20. One was first powered on 2026-11-24, and passed every
+[bring-up check](BRINGUP.md#log) except the finger lead's: its voltages are right, its five chips answer, it runs and
+charges on its cell, its wrist contacts read a nominal 100 kΩ resistor as 10.02 µS, and its pulse sensor shows a
+heartbeat on a fingertip. Nobody has worn it yet, and there is no firmware. On these boards the finger-lead jack's
+switch works the opposite way from this design, so plugging in selects the wrong electrodes
+([known fault](BRINGUP.md#1-with-no-power-cell-out-usb-out)). The fix is to cut one trace and let a setting pick the
+electrodes. No board has been cut yet.
 
 Prices and stock below are from JLCPCB and LCSC on 2026-10-14. The assembly order draws on JLC's
 stock.
@@ -15,7 +21,7 @@ stock.
 |---|---|
 | Quantity | 6 to 8 bands, ordered assembled from JLCPCB (first order: six boards assembled and four bare, in five panels of two) |
 | Signals | EDA (the main signal); PPG for heart rate and beat intervals; skin temperature, for trends; a 3-axis accelerometer as the movement reference for scoring |
-| Electrodes | A finger lead through a 3.5 mm jack is the primary scoring site. Two contacts on the case back are the fallback when no lead is plugged in. Plugging in switches over in hardware. |
+| Electrodes | A finger lead through a 3.5 mm jack is the primary scoring site. Two contacts on the case back are the fallback. On the first boards a setting picks which, and plugging in doesn't switch over ([Electrode selection](#eda-front-end)). |
 | Wear | The back of the non-mouse wrist (see [Wearing and charging](#wearing-and-charging)) |
 | Data | Wi-Fi only (the C6's Bluetooth is unused). Each band is one OpenX Data Connection, which is one IoT Hub device. |
 | Recording | Started and stopped through each band's device twin by `/gamenight start` and `stop` |
@@ -201,7 +207,7 @@ are fine.
 | 6 | D5 | 23 | SCL |
 | 7 | D6 | 16 | `STATUS_LED`, active low. The ROM boot log on this pin flickers it at reset. |
 | 8 | D7 | 17 | Unused |
-| 9 | D8 | 19 | `PLUG_DET`: high when the finger lead is plugged in (100 kΩ pull-up) |
+| 9 | D8 | 19 | `PLUG_DET`: selects the electrodes (100 kΩ pull-up). Low is the wrist contacts, released is the finger lead. Never driven high. |
 | 10 | D9 | 20 | `ADC_RDY`: ADS1115 conversion-ready (10 kΩ pull-up) |
 | 11 | D10 | 18 | `GAUGE_ALRT`: MAX17048 low-battery alert (10 kΩ pull-up) |
 | 17 | EN | — | TP5, for reset during bring-up |
@@ -247,10 +253,15 @@ Research:
 **Electrode selection.** The DG4053E connects the front end to the wrist contacts or to the jack:
 - Channel X carries electrode A and channel Y carries electrode B. Channel Z is unused and tied to
   GND.
-- The jack's detect contact is closed with no plug, which holds `PLUG_DET` low and selects the wrist.
-  A plug opens it, the pull-up takes `PLUG_DET` high, and the switch moves to the jack's tip and ring.
-- Firmware reads the same line and names the stream `EDA` (wrist) or `EDA:LEAD` (finger lead). Finger
-  readings run several times larger than wrist readings, so the two never share a baseline.
+- `PLUG_DET` picks: low is the wrist, and high is the jack's tip and ring. A 100 kΩ pull-up takes it high.
+- The jack's detect switch was meant to hold it low until a plug goes in. On the jack fitted, the switch is
+  open until a plug goes in, so it picks the wrong one
+  ([known fault](BRINGUP.md#1-with-no-power-cell-out-usb-out)).
+- The fix for these boards is to cut the trace from the switch
+  ([BRINGUP.md](BRINGUP.md#4-fix-the-finger-lead-jack)). Then D8 alone drives `PLUG_DET`, a setting decides
+  ([FIRMWARE.md](FIRMWARE.md#signals)), and nothing senses the plug.
+- Firmware names the stream `EDA` (wrist) or `EDA:LEAD` (finger lead). Finger readings run several times
+  larger than wrist readings, so the two never share a baseline.
 - The lead's sleeve is not connected. Of a three-snap lead, use only the tip and ring snaps.
 
 **Electrodes.**
@@ -569,11 +580,10 @@ every line.
 
 ## Open questions
 
-1. **Jack contacts.** XKB's drawing (rev A1, 2025-06-26) has a plug-out schematic that agrees with
-   `band.ts`: 1 sleeve, 2 ring 2 (the sleeve, on a three-pole plug), 3 ring 1, 4 tip, and 5–6 a
-   detect switch, closed with no plug and isolated from the rest. LCSC's footprint numbers its pads
-   the same way. The drawing still doesn't name the contacts, so check one or two loose jacks with a
-   plug and a meter before ordering.
+1. **Jack contacts.** Settled with a meter on an assembled board, 2026-11-24: 1 sleeve, 3 ring and 4 tip,
+   as in `band.ts`, but the 5–6 detect switch closes when a plug goes in, and `band.ts` was drawn for one
+   that opens. The first boards get a cut trace (see [EDA front end](#eda-front-end)). Open: the next
+   board's change, which could be foot 6 to 3V3 and R8 to GND. `band.ts` still shows the board as ordered.
 2. **Cells.** Settled for the prototypes: the TinyCircuits ASR00035, with its plug's contacts swapped
    (see [Power](#power)). Polarity varies by vendor, so meter every plug.
 3. **Measured draw.** The first build's real current sets the final cell size.

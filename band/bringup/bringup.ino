@@ -10,11 +10,13 @@
 // skin-conductance parts changes what they read.
 //
 // On the cell alone (checks 1 and 4). The band switches its electrodes off whenever USB is plugged in,
-// so these run without it and are saved on the board:
-//   1. USB unplugged, SW1 on. The LED lights for 2 s, then blinks once a second.
+// so these run without it and are saved on the board. The sketch looks at the wrist contacts and the
+// finger lead in turn until it finds the resistor:
+//   1. USB unplugged, SW1 on. The LED lights for 2 s, then blinks about once a second.
 //   2. Tape 100 kOhm across E1 and E2. Don't hold it on: fingers on both ends add your own skin to the
-//      reading. The LED goes solid if it reads right, or blinks fast if not. Leave it 5 s.
-//   3. Plug in the finger lead and do the same across its tip and ring snaps.
+//      reading. The LED goes solid if it reads right, or blinks fast if not. Leave it 10 s.
+//   3. Once J2's trace is cut (../BRINGUP.md), plug in the finger lead and do the same across its tip and
+//      ring snaps. Before that, the lead is never connected while it's plugged in.
 //
 // On USB (checks 2, 3 and 5), with the cell in, SW1 on and the resistor still across E1 and E2. Open the
 // Serial Monitor and send a key:
@@ -34,6 +36,8 @@
 
 constexpr float TEST_OHMS = 100000;  // the resistor used for check 4
 
+// PLUG_DET selects the electrodes: low is the wrist, and released (R8 takes it high) is the lead. It is
+// never driven high, because a plugged-in lead ties it to ground until J2's trace is cut.
 const uint8_t PPG_INT = D0, IMU_INT = D1, VLED_EN = D2, VBUS_DIV = D3, STATUS_LED = D6, PLUG_DET = D8,
               ADC_RDY = D9, GAUGE_ALRT = D10;
 const uint8_t GAUGE = 0x36, ADS = 0x48, TMP = 0x49, PPG = 0x57, IMU = 0x6A;
@@ -290,13 +294,15 @@ void startCellRun() {
   saveCellRun();
 }
 
-// Takes one reading, about 0.25 s, and returns whether the LED should be lit.
+// Takes one reading, about 0.25 s, and returns whether the LED should be lit. With nothing attached it
+// changes site every fourth reading.
 bool readOnCell(uint32_t pass) {
+  static bool lead = false;
   static float last = NAN;
   static int lastSite = -1;
-  static uint32_t savedAt = 0;
+  static uint32_t savedAt[2] = {};
 
-  int site = digitalRead(PLUG_DET);
+  int site = digitalRead(PLUG_DET);  // where the switch is: with the trace uncut, a lead holds it on the wrist
   float skin = microsiemens();
   bool attached = skin > 0.05;
   bool steady = site == lastSite && fabsf(skin - last) < (attached ? 0.01 * skin : 0.005);
@@ -304,13 +310,18 @@ bool readOnCell(uint32_t pass) {
   lastSite = site;
 
   float &saved = attached ? cellRun.loaded[site] : cellRun.open[site];
-  if (steady && millis() - savedAt > 2000) {
+  if (steady && millis() - savedAt[site] > 2000) {
     saved = skin;
     saveCellRun();
-    savedAt = millis();
+    savedAt[site] = millis();
   }
-  if (!attached) return pass % 4 == 0;
-  return near(skin, 1e6 / TEST_OHMS, 0.05) || pass % 2 == 0;
+  if (attached) return near(skin, 1e6 / TEST_OHMS, 0.05) || pass % 2 == 0;
+  if (pass % 4 == 0) {
+    lead = !lead;
+    digitalWrite(PLUG_DET, lead);
+    delay(300);  // the front end's 32 ms filter settles
+  }
+  return pass % 4 == 0;
 }
 
 // ---- Arduino ----
@@ -320,7 +331,8 @@ void setup() {
   digitalWrite(VLED_EN, LOW);
   pinMode(STATUS_LED, OUTPUT);
   digitalWrite(STATUS_LED, LOW);  // lit
-  for (uint8_t pin : { PPG_INT, IMU_INT, VBUS_DIV, PLUG_DET, ADC_RDY, GAUGE_ALRT }) pinMode(pin, INPUT);
+  pinMode(PLUG_DET, OUTPUT_OPEN_DRAIN);
+  for (uint8_t pin : { PPG_INT, IMU_INT, VBUS_DIV, ADC_RDY, GAUGE_ALRT }) pinMode(pin, INPUT);
   Serial.begin(115200);
   Wire.begin();
   Wire.setClock(400000);

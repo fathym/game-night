@@ -86,6 +86,7 @@ The band streams only while its device twin says so:
 | `recording` | bool | Stream data. Set by the voice bot on `/gamenight start` and `stop`. |
 | `session` | string | Session ID, copied into every data message |
 | `rawAcc` | bool | Opt-in raw accelerometer (see [Streams](#streams)) |
+| `site` | string | `lead` (the default) or `wrist`: which electrodes to read (see [Signals](#signals)) |
 
 - **Subscribe** to `$iothub/twin/PATCH/properties/desired/#` and `$iothub/twin/res/#`, and fetch the
   full twin at connect with `$iothub/twin/GET/?$rid={n}`.
@@ -140,17 +141,17 @@ These are the raw points the workbench can re-fit offline, backlog included.
 | `usb` | USB power present: EDA is off |
 | `rssi`, `link` | Wi-Fi signal; `mqtt` or `https` |
 | `wrist` | On the wrist (from PPG and temperature, not the electrodes) |
-| `contact` | `ok`, `poor` (EDA below about 0.05 µS while on the wrist) or `open` |
-| `site` | `wrist` or `lead` (from `PLUG_DET`) |
+| `contact` | `ok`, `poor` (EDA below about 0.05 µS while on the wrist) or `open`. An unplugged lead and one off the fingers both read `open`. |
+| `site` | `wrist` or `lead`: the electrodes in use, read back from D8 |
 | `settling` | First 15 minutes after the band goes on the wrist |
 | `board_c`, `radio` | Board temperature (C6 sensor) and radio state, for separating the band's own heating from skin temperature |
 | `backlog` | Bytes waiting to send |
 | `fw` | Firmware version |
 
 **`event`.** `{"type":"event","kind":..,"bt":..,"t":..}` for `hello` (at connect, with firmware
-version and fixed delays), `usb_on`/`usb_off`, `lead_in`/`lead_out`, `recording_on`/`recording_off`,
-`low_battery`, `reset` (a sensor's fit restarted) and `gap` (data discarded, with its time range and
-streams).
+version and fixed delays), `usb_on`/`usb_off`, `site` (the electrodes in use changed),
+`recording_on`/`recording_off`, `low_battery`, `reset` (a sensor's fit restarted) and `gap` (data
+discarded, with its time range and streams).
 
 ### Streams
 
@@ -211,7 +212,7 @@ the band clock, and a fit restart sends a `reset` event.
   - Output each `EDA` value as the time-weighted mean over exactly 100.0 ms of band time, every
     50 ms. That window puts nulls at 10 Hz and its harmonics, which removes 50 and 60 Hz mains hum
     (about −50 dB).
-  - Subtract the front end's 32 ms delay (R17·C18). Flag 1 s after any `PLUG_DET` edge as
+  - Subtract the front end's 32 ms delay (R17·C18). Flag 1 s after any change of `site` as
     settling.
 - **MAX30101** (`PPG_INT`, D0):
   - 100 Hz, green, red and IR, with the FIFO-almost-full interrupt only (A_FULL at 17 unread
@@ -225,10 +226,19 @@ the band clock, and a fit restart sends a `reset` event.
     watermark at 0.5 s routed to INT2, level-triggered.
   - Map the sensor's timestamp counter to band time by reading TIMESTAMP0–3 about once a second.
 - **TMP117:** one-shot, 8 averages, every 1 s; stamped at trigger + 62 ms.
-- **PLUG_DET (D8) and VBUS_DIV (D3):** stamp edges, debounce, keep the first edge's time, and end the
-  current EDA series.
+- **VBUS_DIV (D3):** stamp edges, debounce, keep the first edge's time, and end the current EDA series. A
+  change of `site` ends it too.
 
 ## Signals
+
+**Electrode site.** The twin's `site` picks the electrodes, and nothing senses the plug:
+- `PLUG_DET` (D8) selects them: low is the wrist contacts, and released is the lead, because R8 takes it
+  high. Use an open-drain output and never drive it high: on a band whose J2 trace isn't cut
+  ([BRINGUP.md](BRINGUP.md#4-fix-the-finger-lead-jack)), a plugged-in lead ties it to ground.
+- Start on the lead. An absent or unknown `site` is `lead`.
+- Apply a change at once: end the EDA series, switch, and send a `site` event.
+- Name the stream from D8's level, read back, not from the setting. On an uncut band a plugged-in lead
+  holds D8 low, so the wrist is what is being read.
 
 **EDA:**
 - Conductance = I / V.
@@ -317,8 +327,9 @@ exists. Its first lines say how to use it. [BRINGUP.md](BRINGUP.md) has the step
 2. **I2C scan:** the bus shows 0x36, 0x48, 0x49, 0x57 and 0x6A.
 3. **EDA front end, nothing attached:** TP2 (V15) ≈ 1.50 V, TP3 (V10) ≈ 1.00 V, TP1 (EDA_OUT) ≈
    1.50 V.
-4. **A 100 kΩ resistor across E1–E2** reads about 10 µS. With the lead plugged in, the same
-   resistor across tip and ring reads 10 µS, and `site` reads `lead`.
+4. **A 100 kΩ resistor across E1–E2** reads about 10 µS with `site` set to `wrist`. With it set to
+   `lead` and the lead plugged in, the same resistor across tip and ring reads 10 µS. `status` names the
+   site each time.
 5. **USB plugged in:** `usb` is true, EDA reads open, and the MAX17048 shows a positive charge rate.
 6. **A finger on the PPG window** shows a pulse on `PPG:GRN`.
 7. **TP4 (BOOT) held to GND through a reset** (TP5 to GND) enters download mode.
