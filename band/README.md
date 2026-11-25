@@ -561,9 +561,11 @@ every line.
   band.
 - **The price.** $606.53 before sales tax (the order): $422.78 for the goods, $31.33 shipping, $147.98
   duties and taxes, and a $4.44 disbursement fee. About $101 a band.
-- **Per band.** About **$117** with the cell ($6.95, TinyCircuits, 2026-11-04) and the finger lead ($8.75,
-  SparkFun, 2026-11-23), before the strap, the tape and their shipping.
-- **Consumables.** Single-use finger electrodes each night.
+- **Per band.** About **$121** with the cell ($6.95, TinyCircuits, 2026-11-04), the finger lead ($8.75,
+  SparkFun, 2026-11-23), and a sixth of the strap roll ($9), the foam tape ($14) and the Kapton (about $5), which
+  are what we paid, recorded 2026-11-25. Shipping on all of these isn't included.
+- **Consumables.** Single-use finger electrodes each night: about $50 for ours (what we paid, recorded
+  2026-11-25).
 
 ## Open questions
 

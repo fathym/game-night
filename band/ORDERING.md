@@ -187,11 +187,11 @@ For six bands. "—" means it wasn't recorded.
 | Part | What we bought | Price | Before you use it |
 |---|---|---|---|
 | Cell | TinyCircuits ASR00035, 500 mAh, six | $6.95 (TinyCircuits, 2026-11-04) | Meter it: the plug comes with black on pin 1, the opposite of J1. Swap its two contacts so plus is in the triangle cavity, and meter again. Buy spares; we have none. |
-| Finger lead | SparkFun [CAB-12970](https://www.sparkfun.com/sensor-cable-electrode-pads-3-connector.html), 24" | $8.75 (SparkFun, 2026-11-23) | Meter which snap is tip, ring and sleeve: the page doesn't say. The band uses tip and ring. |
-| Electrodes | Lafayette Instrument 76642R, gel made for skin response | — | The gel is about 0.65" wide and the foam 1.5", too big for a finger as sold. Cut foam off two opposite sides, never the gel. *Not tried yet.* |
-| Strap | Harbor Freight 57372, 3/4" × 35 ft hook-and-loop roll | — | Cut to about 30 cm. 3/4" is the widest common size that fits the slots. |
-| Cell mounting | 3M double-sided foam tape, 0.39" × 10 ft | — | One strip per cell, on its flat body. |
-| Skin side | Polyimide (Kapton) tape | — | Cover everything but U5's window. |
+| Finger lead | SparkFun [CAB-12970](https://www.sparkfun.com/sensor-cable-electrode-pads-3-connector.html), 24", five, and one we already had | $8.75 (SparkFun, 2026-11-23) | Meter which snap is tip, ring and sleeve: the page doesn't say. Ours: red is tip, blue is ring, black is sleeve. The band uses tip and ring. |
+| Electrodes | Lafayette Instrument 76642R, gel made for skin response | about $50 (what we paid, recorded 2026-11-25). How many that bought: — | The gel is about 0.65" wide and the foam 1.5", too big for a finger as sold. They snap onto the lead. Cut foam off two opposite sides, never the gel. *Cutting not tried yet.* |
+| Strap | Harbor Freight 57372, 3/4" × 35 ft hook-and-loop roll, one | $9 (what we paid, recorded 2026-11-25) | Cut to about 30 cm: about 35 straps. 3/4" is the widest common size that fits the slots. |
+| Cell mounting | 3M double-sided foam tape, 0.39" × 10 ft | $14 (what we paid, recorded 2026-11-25) | One strip per cell, on its flat body. |
+| Skin side | Polyimide (Kapton) tape | about $5 (what we paid, recorded 2026-11-25) | Cover everything but U5's window. |
 
 Two electrodes per player per night.
 
