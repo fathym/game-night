@@ -81,6 +81,25 @@ doesn't matter.
 | Continuity | J2 feet 5 and 6, finger lead plugged in | Beep | A foot isn't soldered, or the plug isn't all the way in |
 | Continuity | Each of the lead's snaps and J2 feet 4, 3 and 1 | One snap beeps on each | The jack differs from the design |
 
+J2's feet, top side, with the USB and jack edge at the top:
+
+```
+   ← XIAO                                     strap slots →
+
+                       plug goes in
+                         ┌───────┐
+  ═══════════════════════╡ mouth ╞════════════════════  top edge
+      sleeve   foot 2  ▪┌┴───────┴┐▪  foot 1   sleeve
+                        │         │
+                        │         │▪  foot 3   ring
+                        │   J2    │
+         GND   foot 6  ▪│         │
+      detect   foot 5  ▪│         │▪  foot 4   tip
+                        └─────────┘
+```
+
+Foot 6 sits beside the XIAO's 3V3 pad, and foot 5 beside its D10 pad. Don't mix them up with the XIAO's own pads.
+
 The snap that beeps on foot 4 is **tip**, on foot 3 **ring**, and on foot 1 **sleeve**. Label them. The band
 uses tip and ring. On our SparkFun lead, red is tip, blue is ring and black is sleeve.
 
