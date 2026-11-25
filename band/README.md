@@ -4,13 +4,13 @@ A wrist band that replaces EmotiBit at game night: one per player, worn at home,
 conductance, pulse, skin temperature and wrist movement into OpenX through IoT Hub. This is the
 hardware design. The schematic is generated from [schematic/band.ts](schematic/band.ts) (see
 [Schematic](#schematic)), and the firmware contract is in [FIRMWARE.md](FIRMWARE.md). The first six
-boards came back assembled on 2026-11-20. One was first powered on 2026-11-24, and passed every
-[bring-up check](BRINGUP.md#log) except the finger lead's: its voltages are right, its five chips answer, it runs and
-charges on its cell, its wrist contacts read a nominal 100 kΩ resistor as 10.02 µS, and its pulse sensor shows a
-heartbeat on a fingertip. Nobody has worn it yet, and there is no firmware. On these boards the finger-lead jack's
-switch works the opposite way from this design, so plugging in selects the wrong electrodes
-([known fault](BRINGUP.md#1-with-no-power-cell-out-usb-out)). The fix is to cut one trace and let a setting pick the
-electrodes. No board has been cut yet.
+boards came back assembled on 2026-11-20. One was first powered on 2026-11-24, and by
+2026-11-25 had passed every [bring-up check](BRINGUP.md#log) on the bring-up sketch: its voltages are right, its five
+chips answer, it runs and charges on its cell, its wrist contacts and its finger lead read a nominal 100 kΩ resistor as
+10.02 and 9.97 µS, and its pulse sensor shows a heartbeat on a fingertip. Nobody has worn it yet, and there is no
+firmware. On these boards the finger-lead jack's switch works the opposite way from this design, so plugging in selects
+the wrong electrodes ([known fault](BRINGUP.md#1-with-no-power-cell-out-usb-out)). The fix is to cut one trace and let a
+setting pick the electrodes. That one board has been cut; the other five haven't.
 
 Prices and stock below are from JLCPCB and LCSC on 2026-10-14. The assembly order draws on JLC's
 stock.

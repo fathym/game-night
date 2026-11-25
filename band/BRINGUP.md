@@ -122,9 +122,10 @@ minute.
 2. Switch on. The LED lights for 2 s, then blinks about once a second, while the sketch looks at the wrist contacts and
    the lead in turn. That is check 1. Leave it 10 s.
 3. Tape the resistor across E1 and E2 (skin side, halfway down, 36 and 56 mm from the XIAO end). Keep its body and the
-   tape off U5 between them, and your fingers off it. The LED goes solid. Leave it 10 s.
-4. Skip this until J2 is fixed. Plug in the lead, and move the resistor to its tip and ring snaps. The LED goes solid
-   again. Leave it 10 s.
+   tape off U5 between them, and your fingers off it. The LED goes solid. Leave it 10 s. A fast blink means it reads
+   something, but more than 5% off.
+4. Skip this until J2 is fixed. Plug in the lead, and tape the resistor's legs into its tip and ring snaps. Keep your
+   fingers off here too: skin across the snaps adds to the reading. The LED goes solid again. Leave it 10 s.
 5. Plug in USB without switching off first: switching on again on the cell clears the saved readings. The LED goes back
    to blinking. Wait a few minutes for the charge rate to settle, and send `r`. Keep the whole output. Until J2 is
    fixed, line 4 says FAIL because of the lead: judge its wrist reading.
@@ -140,11 +141,12 @@ wear a band while it's plugged in.
 
 ## 4. Fix the finger-lead jack
 
-*Not done on any board yet.* Do it last, once everything else passes. One cut takes the jack's switch off D8. After that
-D8 alone picks the electrodes: released is the lead, and held low is the wrist. Nothing senses the plug.
+*Done on one board, B01, 2026-11-25. Every meter check below passed, and its lead then read a nominal 100 kΩ resistor
+as 9.97 µS.* Do it last, once everything else passes. One cut takes the jack's switch off D8. After that D8 alone picks the electrodes: released
+is the lead, and held low is the wrist. Nothing senses the plug.
 
-**You need:** a new pointed blade, a phone macro lens or magnifier, tape, a soft dry brush, eye protection and a dust
-mask.
+**You need:** a new pointed blade (a razor blade did B01), a phone macro lens or magnifier, tape, a soft dry brush, eye
+protection and a dust mask.
 
 **Where.** Top side, USB and jack edge at the top, XIAO on the left:
 
@@ -166,24 +168,43 @@ straight down for 0.8 mm, then slants left to the via. Cut only the straight par
 0.84 mm to the left, and the jack's body 0.8 mm to the right. The bare boards have the same trace: cut two of those
 first.
 
-1. Cell, USB and lead out. Tape the board down, with nothing pressing on U5. Photograph the spot.
-2. Meter D8 and foot 5: they beep. That confirms the trace.
-3. Hold the knife nearly upright. Make three to five light strokes across the trace, toward the jack, each under 1 mm.
-   Stop when the bright line is broken. There are more layers below, so don't dig.
-4. Make a second cut 0.3 mm below the first. Flick out the sliver between them, and brush it away. No liquid and no
-   canned air near U5.
+1. Cell, USB and lead out, SW1 off. Tape the board down, with nothing pressing on U5. Photograph the spot.
+2. Meter the "before" column below. D8 and foot 5 beeping confirms the trace.
+3. Lay a strip of tape along the XIAO's pads, and another just right of the trace (not tried yet). On B01 about ten
+   strokes, up to 2 mm long, ran onto the ground copper on the right and up to D10's pad on the left.
+4. Hold the knife nearly upright. Make three to five light strokes across the trace, toward the jack, each under 1 mm.
+   Stop when the bright line is broken. There are more layers below, so don't dig, and stay clear of the via.
+5. Make a second cut 0.3 mm below the first. Flick out the sliver between them.
+6. Brush the whole top side with the dry brush. Look between the XIAO's pads, where a slipped probe can leave shavings.
+   No liquid and no canned air near U5. Photograph the spot again, framed the same way, and compare.
+7. Meter the "after" column.
 
-| Lead | Continuity between | Should |
-|---|---|---|
-| Out, then in | D8 and foot 5 | Not beep. If it does, give the cut one or two more light strokes |
-| Out, then in | D8 and the USB shell | Not beep. If it does, a burr touches ground: clear it |
-| In | Foot 5 and the USB shell | Beep |
-| Out | Foot 5 and the USB shell | Not beep |
-| Out | D10 and foot 5, and D10 and D8 | Not beep |
-| Out | 3V3 and the USB shell, and 5V and the USB shell | Not beep |
+| Lead | Continuity between | Before | After |
+|---|---|---|---|
+| Out | D8 and foot 5 | Beep | **Silent** |
+| In | D8 and foot 5 | Beep | **Silent** |
+| Out | D8 and the USB shell | Silent | Silent |
+| In | D8 and the USB shell | Beep | **Silent** |
+| Out | Foot 5 and the USB shell | Silent | Silent |
+| In | Foot 5 and the USB shell | Beep | Beep |
+| Out | D10 and foot 5 | Silent | Silent |
+| Out | D10 and D8 | Silent | Silent |
+| Out | 3V3 and the USB shell | Silent | Silent |
+| Out | 5V and the USB shell | Silent | Silent |
 
-Cover the cut with a piece of polyimide (Kapton) tape. Then run section 3's steps 2 to 5 again, step 4 included: line 4
-should pass. To undo it, bridge the cut with solder.
+A bare board has no jack or USB shell. There, D8 and foot 5 beep before and are silent after, and D8 and GND, foot 5 and
+GND, and D10 and foot 5 are always silent.
+
+- **D8 and foot 5 still beep:** some copper is left. Give it one or two more light strokes.
+- **D8 and the USB shell beep, and D8 and foot 5 don't:** a burr touches ground. Clear it.
+- **D10, 3V3 or 5V beeps:** stop, and don't power it.
+
+**Leave the cut bare.** It carries 3.3 V through 100 kΩ, beside pads that are bare already. If sweat bridges it, the band
+reads the wrist while a lead is in, and nothing is damaged. Paint nothing on it: U5 is unsealed, and a liquid could creep
+into the jack. If you want it covered before someone wears the band, a 4 mm square of polyimide (Kapton) tape fits below
+foot 5, running right and down over bare board.
+
+Then run section 3's steps 2 to 5 again, step 4 included: line 4 should pass. To undo the cut, bridge it with solder.
 
 ## Log
 
@@ -191,7 +212,7 @@ Band IDs only, never who wears which. "—" means not done yet.
 
 | Band | Cell, resting | 3V3 | TP2 | TP3 | TP1 | Jack | 1 | 2 | 3 | 4 wrist | 4 lead | 5 | 6 | 7 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| B01 | 3.97 (gauge) | 3.3 | 1.50 | 1.00 | 1.50 | Switch reversed; tip, ring, sleeve as designed | pass | pass | pass | 10.02 µS | waits on J2 | pass | pass | pass |
+| B01 | 3.97 (gauge) | 3.3 | 1.50 | 1.00 | 1.50 | Switch reversed; tip, ring, sleeve as designed; trace cut 2026-11-25 | pass | pass | pass | 10.02 µS | 9.97 µS | pass | pass | pass |
 | B02 | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | B03 | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | B04 | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
